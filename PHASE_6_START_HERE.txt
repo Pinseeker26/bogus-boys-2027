@@ -1,0 +1,13 @@
+BOGUS BOYS 2027 — SCHEDULE CORRECTION
+
+Expected: 16 regular-season weeks + 4 playoff weeks = 20 total.
+
+1. Extract into a NEW folder.
+2. Copy your working project URL and publishable key into bb2027_v2/js/supabase-config.js. NEVER paste secret keys.
+3. Open login.html, sign in, and open Online Commissioner HQ.
+4. Click Review Weeks 17–20 for removal. The app checks attendance and rounds references, then asks you to type DELETE.
+5. Confirm the counter becomes 20 and playoffs appear after regular season.
+
+The app refuses cleanup if linked attendance/rounds are detected or dependency checks fail. RLS can hide rows; if other users have already used the schedule, inspect dependencies in Supabase before deleting.
+
+No automatic deletions occur. The season builder now creates only 16 regular + 4 playoff weeks. Playoff formats 1–3 remain placeholders; Final Four is low net. Other league pages remain local demo pages.

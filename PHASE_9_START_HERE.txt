@@ -1,0 +1,19 @@
+BOGUS BOYS 2027 — PHASE 9: PLAYER REGISTRATION AND APPROVAL
+
+1. KEEP your working Phase 8 folder as a backup. Extract this ZIP into a NEW folder.
+2. Open PHASE_9_SETUP.sql with Notepad and run the SQL in Supabase SQL Editor.
+3. Supabase Integrations > Data API > Settings: expose player_registration_requests if necessary. (The table itself is intentionally inaccessible; access is via secured RPCs.)
+4. Copy the URL and sb_publishable_ key from your OWN working Phase 8 js/supabase-config.js into this version's js/supabase-config.js. Never use a secret key.
+5. IMPORTANT: Supabase Authentication > URL Configuration: set Site URL and allowed Redirect URLs to the REAL hosted website domain before inviting players. Email confirmation links may not work properly from local file:// pages. For real users, deploy over HTTPS.
+6. Visit register.html to create a TEST PLAYER account with a DIFFERENT email from the Commissioner account. Confirm that email, then sign in at login.html. Return to register.html and click Request Commissioner Approval.
+7. Sign back in as Commissioner; open commissioner-online.html and use Player Registration Approvals to link the test account to an unlinked member or create a new active golfer.
+8. Sign in as the test player and open player-dashboard.html to submit attendance. Verify it survives a refresh and is visible in Commissioner HQ.
+
+SECURITY NOTES
+- New users have no membership until approved. Approval is server-side and always assigns the 'player' role.
+- No player may choose or link their own roster record. Only Commissioner can approve.
+- Attendance self-service is limited by database RLS to the logged-in player's linked golfer and open weeks.
+- The older demo website pages remain browser-local prototypes; do not treat them as production-secure.
+- The financial dashboard is a placeholder, not a live payment ledger.
+- Registration request submissions currently target the earliest-created 2027 league. If you have multiple 2027 leagues in the same Supabase project, stop and ask for a league-specific registration flow before deployment.
+- Use a separate test email; do not share passwords or API secrets.

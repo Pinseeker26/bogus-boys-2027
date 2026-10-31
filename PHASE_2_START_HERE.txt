@@ -1,0 +1,11 @@
+BOGUS BOYS 2027 — PHASE 2: SUPABASE SIGN-IN TEST
+
+1. Open js/supabase-config.js in Notepad.
+2. Replace PASTE_YOUR_PROJECT_URL_HERE with your Supabase Project URL (https://...supabase.co).
+3. Replace PASTE_YOUR_SB_PUBLISHABLE_KEY_HERE with the sb_publishable_ key.
+4. Save the file. NEVER use a secret key or service-role key.
+5. For reliable testing, serve this folder via a local HTTP server (e.g. python -m http.server 8000) and open http://localhost:8000/login.html. Alternatively upload to a private HTTPS test host.
+6. Sign in with the account you created in Supabase. The page should show your league role if membership policies allow the lookup.
+7. If you see an error, copy the error message (never your password).
+
+IMPORTANT: This is only an authentication and membership read test. Existing Commissioner HQ and other league pages still store demo data in the browser and are NOT protected by this login. Do not publish the prototype as a production league system. Database access and RLS must be tested with commissioner and regular player accounts before rollout.

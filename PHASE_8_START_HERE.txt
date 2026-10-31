@@ -1,0 +1,12 @@
+BOGUS BOYS 2027 — PHASE 8 (Commissioner Attendance)
+
+1. Back up your current bb2027_v2 folder.
+2. In Supabase SQL Editor, open PHASE_8_SETUP.sql in Notepad, copy its SQL, and Run.
+3. In Supabase Integrations > Data API > Settings, expose public.attendance_signups, then Save.
+4. Open commissioner-online.html and find Weekly Attendance & Sign-Ups.
+5. Pick a week and mark an active league golfer Playing, refresh, confirm it persists.
+6. Test Not Playing and No Response. No Response deletes only the signup, not the golfer.
+
+IMPORTANT: This phase is COMMISSIONER-ENTERED attendance only. Individual golfer sign-in/sign-up is not enabled yet, because golfer roster records are not securely linked to authenticated accounts. This prevents impersonation. Guests remain managed in Guest Appearances.
+
+This ZIP retains your existing js/supabase-config.js (the publishable key is public, but do not share your ZIP publicly). Never put a service-role/secret key in browser code.

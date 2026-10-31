@@ -1,0 +1,1 @@
+2027 Season Standings: best eight BBPts from local weekly score records; split-tie points, flights, overall ranking. Browser-only prototype. Important: past weekly attendance and flight assignment history are not yet snapshotted; shared database required before live use.

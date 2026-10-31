@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Bogus Boys Golf League hub powered by Pin Seeker Competitions." />
+  <title>Results | Bogus Boys Golf League</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="Bogus Boys Golf League home">
+  <img src="Images/bb-league-logo.png"
+       alt="Bogus Boys Golf League"
+       class="brand-logo">
+
+  <span class="brand-name">Bogus Boys Golf League</span>
+</a>
+
+      <button class="nav-toggle" id="navToggle" aria-label="Open navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+       <nav class="main-nav" id="mainNav">
+    <a href="index.html">Home</a>
+    <a href="weekly-results.html"class="active">Weekly Results</a>
+    <a href="handicaps.html">Weekly Handicaps</a>
+    <a href="standings.html">Season BBPts</a>
+    <a href="money-holes.html">League Stats</a>
+    <a href="playoffs.html">2026 Playoffs</a>
+     <a href="players.html">Player Bios</a>  
+<a href="hall-of-champions.html">Hall of Champions</a>
+<a href="rules.html">League Rules</a>
+    
+</nav>
+    </div>
+  </header>
+
+  <main>
+  
+    <section class="section" id="results">
+  <div class="container">
+
+    <div class="section-heading">
+  
+    </div>
+
+    <div class="weekly-results-hero">
+
+  <div class="weekly-results-hero-main">
+
+    <span class="result-type">League Night Summary</span>
+
+    <p class="results-date" id="resultsDate">
+      Tuesday, July 21, 2026
+    </p>
+
+    <h1 id="resultsCourse">
+      Rolling Acres Golf Course — South Nine
+    </h1>
+
+    <div class="weekly-summary-divider"></div>
+
+    <div class="weekly-summary-horizontal">
+
+      <div class="weekly-summary-item">
+        <strong id="resultsWeek">TBD</strong>
+      </div>
+
+      <div class="weekly-summary-item">
+        <span>Format</span>
+        <strong id="resultsFormat">TBD</strong>
+      </div>
+
+      <div class="weekly-summary-item">
+        <span>Players</span>
+        <strong id="resultsPlayers">0</strong>
+      </div>
+
+      <div class="weekly-summary-item">
+        <span>Prize Pool</span>
+        <strong id="summaryPrizePool">$0</strong>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+    <div class="section-heading results-subheading">
+      <h2>Flight Winners</h2>
+    </div>
+
+   <div class="flight-winners-podium">
+
+  <article class="flight-winner-card flight-a-card">
+
+    <div class="flight-winner-header">
+      <span class="flight-winner-label">A Flight</span>
+      <span class="flight-winner-badge">Weekly Winners</span>
+    </div>
+
+    <div class="winner-place first-place">
+
+      <div class="winner-rank">1st</div>
+
+      <div class="winner-details">
+        <span class="winner-label">Winner</span>
+        <h3 id="flightAFirst">TBD</h3>
+        <p class="result-note" id="flightAFirstNote"></p>
+      </div>
+
+      <p class="result-prize" id="flightAFirstPrize">$0</p>
+
+    </div>
+
+    <div class="winner-place second-place">
+
+      <div class="winner-rank">2nd</div>
+
+      <div class="winner-details">
+        <span class="winner-label">Runner-Up</span>
+        <h3 id="flightASecond">TBD</h3>
+        <p class="result-note" id="flightASecondNote"></p>
+      </div>
+
+      <p class="result-prize" id="flightASecondPrize">$0</p>
+
+    </div>
+
+  </article>
+
+  <article class="flight-winner-card flight-b-card">
+
+    <div class="flight-winner-header">
+      <span class="flight-winner-label">B Flight</span>
+      <span class="flight-winner-badge">Weekly Winners</span>
+    </div>
+
+    <div class="winner-place first-place">
+
+      <div class="winner-rank">1st</div>
+
+      <div class="winner-details">
+        <span class="winner-label">Winner</span>
+        <h3 id="flightBFirst">TBD</h3>
+        <p class="result-note" id="flightBFirstNote"></p>
+      </div>
+
+      <p class="result-prize" id="flightBFirstPrize">$0</p>
+
+    </div>
+
+    <div class="winner-place second-place">
+
+      <div class="winner-rank">2nd</div>
+
+      <div class="winner-details">
+        <span class="winner-label">Runner-Up</span>
+        <h3 id="flightBSecond">TBD</h3>
+        <p class="result-note" id="flightBSecondNote"></p>
+      </div>
+
+      <p class="result-prize" id="flightBSecondPrize">$0</p>
+
+    </div>
+
+  </article>
+
+</div>
+<div class="section-heading results-subheading">
+  <h2>Money Hole Winners</h2>
+</div>
+
+<div class="money-hole-scorecards">
+
+  <article class="money-hole-scorecard">
+
+    <div class="money-hole-scorecard-header">
+      <span class="money-hole-accent"></span>
+
+      <div>
+  <span class="money-hole-number" id="moneyHoleOneNumber">Hole</span>
+  <h3 id="moneyHoleOneTitle">Money Hole</h3>
+</div>
+    </div>
+
+    <div class="money-hole-result-row">
+      <span class="money-hole-flight">A Flight</span>
+
+      <div class="money-hole-player">
+        <strong id="moneyHoleOneAWinner">TBD</strong>
+        <span id="moneyHoleOneADistance"></span>
+        <small class="result-note" id="moneyHoleOneANote"></small>
+      </div>
+
+      <span class="money-hole-prize" id="moneyHoleOneAPrize">$0</span>
+    </div>
+
+    <div class="money-hole-result-row">
+      <span class="money-hole-flight">B Flight</span>
+
+      <div class="money-hole-player">
+        <strong id="moneyHoleOneBWinner">TBD</strong>
+        <span id="moneyHoleOneBDistance"></span>
+        <small class="result-note" id="moneyHoleOneBNote"></small>
+      </div>
+
+      <span class="money-hole-prize" id="moneyHoleOneBPrize">$0</span>
+    </div>
+
+  </article>
+
+  <article class="money-hole-scorecard">
+
+    <div class="money-hole-scorecard-header">
+      <span class="money-hole-accent"></span>
+
+      <div>
+  <span class="money-hole-number" id="moneyHoleTwoNumber">Hole</span>
+  <h3 id="moneyHoleTwoTitle">Money Hole</h3>
+</div>
+    </div>
+
+    <div class="money-hole-result-row">
+      <span class="money-hole-flight">A Flight</span>
+
+      <div class="money-hole-player">
+        <strong id="moneyHoleTwoAWinner">TBD</strong>
+        <span id="moneyHoleTwoADistance"></span>
+        <small class="result-note" id="moneyHoleTwoANote"></small>
+      </div>
+
+      <span class="money-hole-prize" id="moneyHoleTwoAPrize">$0</span>
+    </div>
+
+    <div class="money-hole-result-row">
+      <span class="money-hole-flight">B Flight</span>
+
+      <div class="money-hole-player">
+        <strong id="moneyHoleTwoBWinner">TBD</strong>
+        <span id="moneyHoleTwoBDistance"></span>
+        <small class="result-note" id="moneyHoleTwoBNote"></small>
+      </div>
+
+      <span class="money-hole-prize" id="moneyHoleTwoBPrize">$0</span>
+    </div>
+
+  </article>
+
+</div>
+<div class="section-heading results-subheading league-week-heading">
+    
+    <h2>Previous Weekly Winners</h2>
+    
+</div>
+
+<div class="result-card league-week-card">
+
+    
+<p>This section will allow you to browse previous league nights, including flight winners, money hole winners, and complete weekly leaderboards.</p>
+    <select id="resultsWeekSelect" class="week-selector" disabled>
+    <option>Historical Results Coming Soon</option>
+</select>
+
+</div>
+    <div class="section-heading results-subheading">
+      <h2>Complete Weekly Results</h2>
+    </div>
+
+    <div class="panel">
+
+    <div class="official-results-table-wrap">
+    <table class="official-results-table">
+    <colgroup>
+        <col class="results-player">
+        <col class="results-gross">
+        <col class="results-hdcp">
+        <col class="results-net">
+        <col class="results-target">
+        <col class="results-plusminus">
+        <col class="results-bbpts">
+        <col class="results-format">
+        <col class="results-moneyhole">
+        <col class="results-total">
+    </colgroup>
+
+    <thead>
+        <tr>
+            <th>Golfer</th>
+            <th><span class="results-header-label">Gross</span></th>
+            <th><span class="results-header-label">HDCP</span></th>
+            <th><span class="results-header-label">Net</span></th>
+            <th><span class="results-header-label">Target</span></th>
+            <th><span class="results-header-label">+/-</span></th>
+            <th><span class="results-header-label">BBPts</span></th>
+            <th><span class="results-header-label">Format<br>$</span></th>
+            <th><span class="results-header-label">Money Hole<br>$</span></th>
+            <th><span class="results-header-label">Total<br>$</span></th>
+        </tr>
+    </thead>
+
+    <tbody id="completeLeaderboard"></tbody>
+</table>
+</div>
+
+</div>
+
+  </div>
+</section>
+
+    </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+
+        <div class="footer-center">
+
+            <img src="images/bb-league-logo.png"
+                 alt="Bogus Boys Golf League"
+                 class="footer-logo">
+
+            <span class="footer-league-name">
+    Bogus Boys Golf League
+</span>
+
+<span class="footer-separator">|</span>
+
+<span class="footer-divider">
+    Competition Platform by
+</span>
+
+            <div class="footer-psc-badge">
+    <img src="images/psc-logo1.png"
+         alt="Pin Seeker Competitions"
+         class="footer-psc-logo">
+</div>
+
+        </div>
+
+    </div>
+</footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js?v=20260813-1"></script>
+  
+</body>
+</html>

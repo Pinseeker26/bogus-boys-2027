@@ -1,0 +1,11 @@
+PHASE 5 — 2027 SEASON SCHEDULE BUILDER
+
+1. Extract this ZIP to a NEW folder.
+2. In bb2027_v2/js/supabase-config.js, enter your existing working Supabase URL and publishable key (never a secret key).
+3. Open login.html and sign in. Open Online Commissioner HQ.
+4. Click Add missing season weeks, then confirm.
+5. The builder adds 20 regular weeks (Net, Net, Quota, Quota repeating) plus four playoff weeks, without overwriting existing records.
+6. Dates remain blank. Set dates individually once your venue and start date are confirmed.
+7. Playoff rounds 1-3 default to Net placeholders; playoff round 4 defaults to Low Net.
+
+IMPORTANT: This changes live Supabase schedule records. Existing league pages are still local demo pages, not connected to the live schedule. Verify RLS policies and permissions before inviting players.

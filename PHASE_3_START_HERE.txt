@@ -1,0 +1,14 @@
+BOGUS BOYS — PHASE 3: ONLINE COMMISSIONER HQ (READ ONLY)
+
+1. Extract this ZIP to a NEW folder.
+2. In bb2027_v2/js/supabase-config.js, enter your working project URL and sb_publishable_ key from your previous Phase 2 folder. Never enter a secret key.
+3. Open bb2027_v2/login.html and sign in. Click 'Open Online Commissioner HQ'.
+4. You should see your real league name, season, membership count, weeks count and roster.
+5. If you get an error, capture its exact text. If the browser blocks file:// loading, use a local web server.
+
+SECURITY/STATUS
+- Online HQ checks authenticated Supabase user and league commissioner membership before requesting league records. RLS must enforce data permissions; the browser check alone is not security.
+- The Online HQ is READ ONLY. It does not save roster, attendance, results or other data.
+- The existing commissioner.html and other legacy pages remain LOCAL DEMOS and are NOT secure administrative interfaces. Do not publish them as production admin pages.
+- No live migrations have occurred. Do not assume local prototype data is in Supabase.
+- Supabase policies and database permissions need negative tests with a player account before production launch.

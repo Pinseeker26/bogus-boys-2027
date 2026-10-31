@@ -1,0 +1,1 @@
+2027 Handicaps page: read-only latest entered 9-hole handicap and quota target per golfer, grouped by fixed season flight. No automatic handicap index computation until course and league handicap rules are specified. Values are derived from weekly-results local browser storage. Open handicaps.html.

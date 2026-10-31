@@ -1,0 +1,1 @@
+Bogus Boys 2027 Rules page. On-course rules are carried over verbatim from the previous website and should be approved for the new venue. Competition rules summarize confirmed BBPts, handicap and playoff structure. Commissioner notices can be added/edited/deleted locally. Browser-only prototype; not secure or shared across devices.

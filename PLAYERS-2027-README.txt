@@ -1,0 +1,1 @@
+New 2027 Players Directory and individual player profiles. Open players.html; click a player to view results. Uses same browser localStorage keys as Commissioner HQ and Weekly Results. Read-only display. No authentication/shared backend yet. Historical flight changes remain a known prototype limitation.

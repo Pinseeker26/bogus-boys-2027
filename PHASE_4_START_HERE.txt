@@ -1,0 +1,15 @@
+BOGUS BOYS 2027 — PHASE 4: ONLINE SCHEDULE
+
+1. Extract this ZIP to a NEW folder.
+2. Copy ONLY your working project URL and sb_publishable_ key into bb2027_v2/js/supabase-config.js.
+   Never enter a secret/service-role key.
+3. Open bb2027_v2/login.html and sign in.
+4. Click Open Online Commissioner HQ.
+5. Scroll to 2027 Online Schedule. Add regular-season week 1 with a date and Net format.
+6. Check that the scheduled weeks count becomes 1 and the row appears.
+7. Refresh the page to confirm it persists in Supabase.
+
+The online schedule writes to the real Supabase public.weeks table, subject to its RLS policies.
+Other legacy pages still use browser demo storage and DO NOT read this schedule yet.
+Do not publish legacy Commissioner HQ as a secure admin interface.
+Do not enter real player information until permissions have been tested with a non-commissioner account.
