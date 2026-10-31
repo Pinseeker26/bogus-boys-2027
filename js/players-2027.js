@@ -1,14 +1,224 @@
-/* Read-only player directory; browser-local prototype. */
-(function(){
-const RESULT_KEY='bb2027-results-v1';
-const $=id=>document.getElementById(id);
-const pts=rank=>Math.max(0,110-10*rank);
-function results(){try{return JSON.parse(localStorage.getItem(RESULT_KEY))||{}}catch{return {}}}
-function metric(s,fmt){if(!s)return null;let a=fmt==='net'?s.gross:s.quotaPoints,b=fmt==='net'?s.handicap:s.quotaTarget;if(a==null||b==null||a===''||b===''||!Number.isFinite(Number(a))||!Number.isFinite(Number(b)))return null;return Number(a)-Number(b)}
-function formatFor(w,d){return d.format==='net'||d.format==='quota'?d.format:(Math.floor((Number(w)-1)/2)%2===0?'net':'quota')}
-function statistics(){const league=readLeague(),weeks=results(),stats={};league.players.forEach(p=>stats[p.id]={...p,rounds:[]});Object.entries(weeks).forEach(([week,d])=>{if(!d?.scores)return;const fmt=formatFor(week,d);for(const flight of ['A','B']){const ranked=league.players.filter(p=>p.flight===flight).map(p=>({p,value:metric(d.scores[p.id],fmt)})).filter(r=>r.value!==null).sort((a,b)=>fmt==='net'?a.value-b.value:b.value-a.value);for(let i=0;i<ranked.length;){let j=i+1;while(j<ranked.length&&ranked[j].value===ranked[i].value)j++;let award=0;for(let k=i;k<j;k++)award+=pts(k+1);award/=(j-i);for(let k=i;k<j;k++)stats[ranked[k].p.id].rounds.push({week:Number(week),format:fmt,score:ranked[k].value,place:i+1,points:award});i=j;}}});return Object.values(stats).map(p=>({...p,count:p.rounds.length,best:p.rounds.map(r=>r.points).sort((a,b)=>b-a).slice(0,8).reduce((s,n)=>s+n,0),all:p.rounds.reduce((s,r)=>s+r.points,0)})).sort((a,b)=>a.name.localeCompare(b.name));}
-const safe=s=>escapeText(s??'');const fmt=n=>Number.isInteger(n)?String(n):Number(n).toFixed(1);const initials=n=>String(n).trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase();
-function directory(){const players=statistics();$('player-count').textContent=players.length;$('flight-a-count').textContent=players.filter(p=>p.flight==='A').length;$('flight-b-count').textContent=players.filter(p=>p.flight==='B').length;function render(){const q=$('player-search').value.trim().toLowerCase(),f=$('flight-filter').value,shown=players.filter(p=>(f==='ALL'||p.flight===f)&&p.name.toLowerCase().includes(q));$('players-grid').innerHTML=shown.map(p=>`<a class="player-card" href="players-profile.html?id=${encodeURIComponent(p.id)}"><div class="player-initials">${safe(initials(p.name))}</div><h3>${safe(p.name)}</h3><span class="player-tag">FLIGHT ${safe(p.flight)}</span><div class="player-stats"><div><small>BEST 8 BBPts</small><b>${fmt(p.best)}</b></div><div><small>ROUNDS</small><b>${p.count}</b></div></div></a>`).join('')||'<div class="empty-players">No players match your search. Add golfers in Commissioner HQ.</div>';} $('player-search').addEventListener('input',render);$('flight-filter').addEventListener('change',render);render();}
-function profile(){const id=new URLSearchParams(location.search).get('id'),p=statistics().find(x=>x.id===id);if(!p){$('player-profile').innerHTML='<div class="empty-players">Player not found. <a href="players.html">Return to the directory.</a></div>';return;}const rows=[...p.rounds].sort((a,b)=>a.week-b.week);$('player-profile').innerHTML=`<section class="profile-heading"><div class="player-initials">${safe(initials(p.name))}</div><div><h2>${safe(p.name)}</h2><span class="player-tag">FLIGHT ${safe(p.flight)} · 2027</span></div></section><section class="profile-metrics"><div><small>BEST 8 BBPts</small><strong>${fmt(p.best)}</strong></div><div><small>ROUNDS RECORDED</small><strong>${p.count}</strong></div><div><small>ALL BBPts EARNED</small><strong>${fmt(p.all)}</strong></div></section><section class="profile-section"><h3>Week-by-Week Results</h3><table class="profile-table"><thead><tr><th>WEEK</th><th>FORMAT</th><th>RESULT</th><th>FLIGHT PLACE</th><th>BBPts</th></tr></thead><tbody>${rows.map(r=>`<tr><td>Week ${r.week}</td><td>${r.format==='net'?'Net Score':'Quota'}</td><td>${r.format==='quota'&&r.score>0?'+':''}${fmt(r.score)}</td><td>${r.place}</td><td><strong>${fmt(r.points)}</strong></td></tr>`).join('')||'<tr><td colspan="5">No completed weekly scores yet.</td></tr>'}</tbody></table></section>`;}
-if($('players-grid'))directory();if($('player-profile'))profile();window.addEventListener('storage',()=>location.reload());
+
+/* Bogus Boys 2027 — Members-only player directory and profiles */
+(async function () {
+  const $ = id => document.getElementById(id);
+  const directoryPage = !!$('players-grid');
+  const profilePage = !!$('player-profile');
+
+  if (!directoryPage && !profilePage) return;
+
+  const status = directoryPage
+    ? $('players-status')
+    : $('profile-status');
+
+  const content = directoryPage
+    ? $('players-grid')
+    : $('player-profile');
+
+  function message(text, signIn = false) {
+    status.textContent = text;
+
+    if (signIn) {
+      const link = document.createElement('a');
+      link.href = 'clubhouse.html';
+      link.textContent = ' Go to the Clubhouse';
+      status.appendChild(link);
+    }
+  }
+
+  function initials(name) {
+    return String(name || '')
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map(part => part.charAt(0))
+      .join('')
+      .toUpperCase();
+  }
+
+  function element(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  try {
+    if (!window.supabase || !window.BB_SUPABASE_CONFIG) {
+  throw new Error('Supabase connection is not available.');
+}
+
+const db = window.supabase.createClient(
+  window.BB_SUPABASE_CONFIG.url,
+  window.BB_SUPABASE_CONFIG.publishableKey
+);
+
+    const { data: authData, error: authError } =
+      await db.auth.getUser();
+
+    const user = authData?.user;
+
+    if (!user) {
+      message('Please sign in to view Bogus Boys players.', true);
+      return;
+    }
+
+    if (authError) throw authError;
+
+    const { data: memberships, error: memberError } =
+      await db
+        .from('memberships')
+        .select('league_id')
+        .eq('user_id', user.id)
+        .limit(1);
+
+    if (memberError) throw memberError;
+
+    if (!memberships || memberships.length === 0) {
+      message('Player information is available to approved league members only.');
+      return;
+    }
+
+    const leagueId = memberships[0].league_id;
+
+    const { data: golfers, error: golferError } =
+      await db
+        .from('golfers')
+        .select('id, display_name, flight, active')
+        .eq('league_id', leagueId)
+        .eq('active', true)
+        .order('display_name');
+
+    if (golferError) throw golferError;
+
+    const players = golfers || [];
+
+    if (directoryPage) {
+      $('player-count').textContent = players.length;
+      $('flight-a-count').textContent =
+        players.filter(p => p.flight === 'A').length;
+      $('flight-b-count').textContent =
+        players.filter(p => p.flight === 'B').length;
+
+      function renderDirectory() {
+        const search = $('player-search').value.trim().toLowerCase();
+        const flight = $('flight-filter').value;
+
+        const shown = players.filter(p => {
+          const name = p.display_name || '';
+          return (flight === 'ALL' || p.flight === flight) &&
+            name.toLowerCase().includes(search);
+        });
+
+        content.replaceChildren();
+
+        if (!shown.length) {
+          content.appendChild(element(
+            'div',
+            'empty-players',
+            'No golfers match your search.'
+          ));
+          return;
+        }
+
+        for (const player of shown) {
+          const card = element('a', 'player-card');
+          card.href = 'players-profile.html?id=' +
+            encodeURIComponent(player.id);
+
+          card.appendChild(element(
+            'div',
+            'player-initials',
+            initials(player.display_name)
+          ));
+
+          card.appendChild(element(
+            'h3',
+            '',
+            player.display_name || 'Unnamed Golfer'
+          ));
+
+          card.appendChild(element(
+            'span',
+            'player-tag',
+            'FLIGHT ' + (player.flight || 'UNASSIGNED')
+          ));
+
+          const stats = element('div', 'player-stats');
+          const note = element(
+            'div',
+            '',
+            'Season statistics coming soon'
+          );
+          stats.appendChild(note);
+          card.appendChild(stats);
+
+          content.appendChild(card);
+        }
+      }
+
+      $('player-search').addEventListener('input', renderDirectory);
+      $('flight-filter').addEventListener('change', renderDirectory);
+
+      renderDirectory();
+    }
+
+    if (profilePage) {
+      const id = new URLSearchParams(location.search).get('id');
+      const player = players.find(p => String(p.id) === id);
+
+      content.replaceChildren();
+
+      if (!player) {
+        content.appendChild(element(
+          'div',
+          'empty-players',
+          'Player not found in the active league roster.'
+        ));
+      } else {
+        const heading = element('section', 'profile-heading');
+
+        heading.appendChild(element(
+          'div',
+          'player-initials',
+          initials(player.display_name)
+        ));
+
+        const details = element('div');
+        details.appendChild(element(
+          'h2',
+          '',
+          player.display_name || 'Unnamed Golfer'
+        ));
+        details.appendChild(element(
+          'span',
+          'player-tag',
+          'FLIGHT ' + (player.flight || 'UNASSIGNED') + ' · 2027'
+        ));
+
+        heading.appendChild(details);
+        content.appendChild(heading);
+
+        const section = element('section', 'profile-section');
+        section.appendChild(element(
+          'h3',
+          '',
+          'Week-by-Week Results'
+        ));
+        section.appendChild(element(
+          'p',
+          '',
+          'Official season statistics will appear here once results are recorded.'
+        ));
+        content.appendChild(section);
+      }
+    }
+
+    status.hidden = true;
+    content.hidden = false;
+
+  } catch (error) {
+    console.error('Players page error:', error);
+    message('Unable to load player information. Please try again later.');
+  }
 })();
