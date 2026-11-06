@@ -1,33 +1,52 @@
-/* Bogus Boys 2027 playoff calculator. Local-browser prototype only. */
-(()=>{
-const RESULTS='bb2027-results-v1', PLAYOFF='bb2027-playoffs-v1';
+/* Bogus Boys 2027 - official Supabase playoff viewer. Read-only until secure playoff finalization exists. */
+(()=>{'use strict';
 const $=id=>document.getElementById(id);
-const load=k=>{try{return JSON.parse(localStorage.getItem(k))||{}}catch{return {}}};
-const save=d=>localStorage.setItem(PLAYOFF,JSON.stringify(d));
-const num=x=>x===''||x==null||!Number.isFinite(Number(x))?null:Number(x);
-const netScore=(s,f)=>{if(!s)return null;let a=num(f==='quota'?s.quotaPoints:s.gross),b=num(f==='quota'?s.quotaTarget:s.handicap);return a===null||b===null?null:a-b};
-const fmt=(w,d)=>d.format==='net'||d.format==='quota'?d.format:(Math.floor((+w-1)/2)%2===0?'net':'quota');
-const bbpts=r=>Math.max(0,110-r*10);
-function regular(){const players=readLeague().players,earned=Object.fromEntries(players.map(p=>[p.id,[]]));
-Object.entries(load(RESULTS)).forEach(([w,d])=>{if(!d?.scores)return;const f=fmt(w,d);for(const flight of ['A','B']){const rows=players.filter(p=>p.flight===flight).map(p=>({id:p.id,v:netScore(d.scores[p.id],f)})).filter(x=>x.v!==null).sort((a,b)=>f==='net'?a.v-b.v:b.v-a.v);for(let i=0;i<rows.length;){let j=i+1;while(j<rows.length&&rows[j].v===rows[i].v)j++;let sum=0;for(let k=i;k<j;k++)sum+=bbpts(k+1);for(let k=i;k<j;k++)earned[rows[k].id].push(sum/(j-i));i=j;}}});
-return players.map(p=>({...p,best:(earned[p.id]||[]).sort((a,b)=>b-a).slice(0,8).reduce((a,b)=>a+b,0),rounds:earned[p.id]?.length||0})).sort((a,b)=>b.best-a.best||b.rounds-a.rounds||a.name.localeCompare(b.name));}
-function award(rank,round){if(round===1)return Math.max(0,540-20*rank);if(round===2)return Math.max(0,1700-100*rank);return [4800,4200,3600,3000,2400,1800,1200,600][rank-1]||0}
-function placed(players,round,values){const scored=players.map(p=>({...p,net:num(values[p.id])})).filter(p=>p.net!==null).sort((a,b)=>a.net-b.net||a.name.localeCompare(b.name));for(let i=0;i<scored.length;){let j=i+1;while(j<scored.length&&scored[j].net===scored[i].net)j++;const shared=Array.from({length:j-i},(_,n)=>award(i+n+1,round)).reduce((a,b)=>a+b,0)/(j-i);for(let k=i;k<j;k++){scored[k].place=i+1;scored[k].award=shared}i=j;}return scored}
-function build(){const reg=regular(),state=load(PLAYOFF),rounds=state.rounds||{},seeded=reg.map((p,i)=>({...p,seed:i+1,seedPts:Math.max(0,1010-10*(i+1)),total:Math.max(0,1010-10*(i+1))}));
-const stages=[];let eligible=seeded;
-for(let r=1;r<=3;r++){const vals=rounds[r]||{},scored=placed(eligible,r,vals),byId=Object.fromEntries(scored.map(x=>[x.id,x]));const ranked=eligible.map(p=>({...p,net:byId[p.id]?.net??null,place:byId[p.id]?.place??null,award:byId[p.id]?.award??null,total:p.total+(byId[p.id]?.award||0)})).sort((a,b)=>b.total-a.total||(a.net??Infinity)-(b.net??Infinity)||a.seed-b.seed||a.name.localeCompare(b.name));const cutoff=r===1?16:r===2?8:4;const complete=eligible.length>0&&eligible.every(p=>byId[p.id]);const advance=complete?ranked.slice(0,cutoff):[];stages.push({round:r,eligible,ranked,advance,complete,cutoff});eligible=advance;}
-return {reg,seeded,stages,finalists:eligible,state};}
-function n(x){return x==null?'—':Number.isInteger(x)?String(x):x.toFixed(2).replace(/0+$/,'').replace(/\.$/,'')}
-function table(rows,headers){return `<div class="playoff-table-scroll"><table class="playoff-table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')||'<tr><td colspan="7">No eligible golfers yet.</td></tr>'}</tbody></table></div>`}
-function render(){const d=build(),p=d.state,rounds=p.rounds||{};$('seed-count').textContent=d.seeded.length;$('status').textContent=d.stages.filter(s=>s.complete).length+' of 3 qualifying rounds complete';
-$('seeds').innerHTML=table(d.seeded.map(x=>`<tr><td>${x.seed}</td><td><strong>${escapeText(x.name)}</strong></td><td>Flight ${escapeText(x.flight)}</td><td>${n(x.best)}</td><td class="gold-text">${n(x.seedPts)}</td></tr>`),['SEED','GOLFER','SEASON FLIGHT','BEST 8 BBPts','NEW SEED POINTS']);
-for(const s of d.stages){const r=s.round,canEdit=r===1||d.stages[r-2].complete;const vals=rounds[r]||{};const rows=s.ranked.map((x,i)=>`<tr class="${s.complete&&i<s.cutoff?'advance':''}"><td>${i+1}</td><td><strong>${escapeText(x.name)}</strong>${s.complete&&i<s.cutoff?' <span class="qualifier">ADVANCES</span>':''}</td><td>${n(x.total-(x.award||0))}</td><td><input class="net-input" type="number" step="0.1" data-round="${r}" data-id="${escapeText(x.id)}" value="${escapeText(vals[x.id]??'')}" ${canEdit?'':'disabled'} aria-label="${escapeText(x.name)} round ${r} net score"></td><td>${n(x.place)}</td><td>${n(x.award)}</td><td class="gold-text">${n(x.total)}</td></tr>`);
-$('round-'+r).innerHTML=canEdit?table(rows,['RANK','GOLFER','POINTS IN','ROUND NET','FINISH','AWARDED','CUMULATIVE']):'<p class="empty-message">Complete the preceding round to unlock this field.</p>';
-$('round-'+r+'-status').textContent=s.complete?`Complete · Top ${s.cutoff} advance`:canEdit?`Enter a net score for all ${s.eligible.length} golfers to confirm the top ${s.cutoff}.`:'Waiting for previous round';}
-const finalScores=p.final||{};const finalists=d.finalists;const completed=finalists.length>0&&finalists.every(x=>num(finalScores[x.id])!==null);const sorted=[...finalists].sort((a,b)=>(num(finalScores[a.id])??Infinity)-(num(finalScores[b.id])??Infinity)||a.name.localeCompare(b.name));$('final').innerHTML=finalists.length?table(sorted.map((x,i)=>`<tr><td>${completed?i+1:'—'}</td><td><strong>${escapeText(x.name)}</strong></td><td><input class="net-input" type="number" step="0.1" data-final="${escapeText(x.id)}" value="${escapeText(finalScores[x.id]??'')}" aria-label="${escapeText(x.name)} championship net score"></td></tr>`),['PLACE','FINALIST','CHAMPIONSHIP NET']):'<p class="empty-message">The Final Four will appear once Round 3 is complete.</p>';
-const winners=completed?sorted.filter(x=>num(finalScores[x.id])===num(finalScores[sorted[0].id])):[];$('champion').textContent=completed?(winners.length===1?'CHAMPION: '+winners[0].name:'TIED FOR CHAMPIONSHIP: '+winners.map(x=>x.name).join(' / ')):'Championship awaits the Final Four';$('champion-note').textContent=completed&&winners.length>1?'A championship net-score tie requires a commissioner-decided playoff or tiebreak rule.': 'Lowest championship net score wins; prior points do not carry into the final.';
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=x=>x===null||x===undefined||x===''||!Number.isFinite(Number(x))?null:Number(x);
+const show=x=>x==null?'—':Number.isInteger(x)?String(x):Number(x.toFixed(2)).toString();
+const table=(rows,headers)=>`<div class="playoff-table-scroll"><table class="playoff-table"><thead><tr>${headers.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.join('')||`<tr><td colspan="${headers.length}">No official results yet.</td></tr>`}</tbody></table></div>`;
+const award=(rank,r)=>r===1?Math.max(0,540-20*rank):r===2?Math.max(0,1700-100*rank):[4800,4200,3600,3000,2400,1800,1200,600][rank-1]||0;
+async function all(q,label){const rows=[];for(let i=0;;i+=1000){const {data,error}=await q.range(i,i+999);if(error)throw Error(label+': '+error.message);rows.push(...(data||[]));if(!data||data.length<1000)return rows;}}
+function net(r){const gross=num(r?.gross_score),hcp=num(r?.handicap_used);return gross==null||hcp==null?null:gross-hcp;}
+function place(players,r,rounds){const values=players.map(p=>({...p,net:net(rounds.get(p.id))})).filter(p=>p.net!==null).sort((a,b)=>a.net-b.net||a.seed-b.seed);
+for(let i=0;i<values.length;){let j=i+1;while(j<values.length&&values[j].net===values[i].net)j++;const pts=Array.from({length:j-i},(_,k)=>award(i+k+1,r)).reduce((a,b)=>a+b,0)/(j-i);for(let k=i;k<j;k++){values[k].place=i+1;values[k].award=pts;}i=j;}return new Map(values.map(p=>[p.id,p]));}
+function render(golfers,weeks,rounds){
+ const earned=new Map();for(const round of rounds){if(round.week_id && weeks.regIds.has(round.week_id)&&round.finalized&&num(round.bb_points)!==null){const a=earned.get(round.golfer_id)||[];a.push(Number(round.bb_points));earned.set(round.golfer_id,a);}}
+ const seeds=golfers.filter(g=>g.active&&g.kind!=='guest'&&['A','B'].includes(g.flight)).map(g=>{const a=(earned.get(g.id)||[]).sort((x,y)=>y-x);return {id:g.id,name:g.display_name,flight:g.flight,best:a.slice(0,8).reduce((x,y)=>x+y,0),all:a.reduce((x,y)=>x+y,0),count:a.length};}).sort((a,b)=>b.best-a.best||b.all-a.all||a.name.localeCompare(b.name)).map((g,i)=>({...g,seed:i+1,seedPts:1000-i*10,total:1000-i*10}));
+ $('seed-count').textContent=seeds.length;
+ $('seeds').innerHTML=table(seeds.map(p=>`<tr><td>${p.seed}</td><td><strong>${esc(p.name)}</strong></td><td>Flight ${esc(p.flight)}</td><td>${show(p.best)}</td><td class="gold-text">${show(p.seedPts)}</td></tr>`),['SEED','GOLFER','SEASON FLIGHT','BEST 8 BBPts','NEW SEED POINTS']);
+ let eligible=seeds,finished=0;
+ for(let r=1;r<=3;r++){
+  const week=weeks.playoff.get(r),prior=weeks.playoff.get(r-1),unlocked=r===1||prior?.status==='finalized';
+  const rs=new Map(rounds.filter(x=>x.week_id===week?.id).map(x=>[x.golfer_id,x]));
+  const placed=place(eligible,r,rs);
+  const ranked=eligible.map(p=>({...p,net:placed.get(p.id)?.net??null,place:placed.get(p.id)?.place??null,award:placed.get(p.id)?.award??null,total:p.total+(placed.get(p.id)?.award||0)})).sort((a,b)=>b.total-a.total||(a.net??Infinity)-(b.net??Infinity)||a.seed-b.seed);
+  const complete=Boolean(week&&week.status==='finalized'&&eligible.length&&eligible.every(p=>rs.get(p.id)?.finalized&&net(rs.get(p.id))!==null));
+  const cutoff=[0,16,8,4][r];
+  $('round-'+r).innerHTML=unlocked?table(ranked.map((p,i)=>`<tr class="${complete&&i<cutoff?'advance':''}"><td>${i+1}</td><td><strong>${esc(p.name)}</strong>${complete&&i<cutoff?' <span class="qualifier">ADVANCES</span>':''}</td><td>${show(p.total-(p.award||0))}</td><td>${show(p.net)}</td><td>${show(p.place)}</td><td>${show(p.award)}</td><td class="gold-text">${show(p.total)}</td></tr>`),['RANK','GOLFER','POINTS IN','ROUND NET','FINISH','AWARDED','CUMULATIVE']):'<p class="empty-message">Waiting for the previous playoff round to be finalized.</p>';
+  $('round-'+r+'-status').textContent=!week?'Playoff week missing from Supabase':complete?`Finalized · Top ${Math.min(cutoff,eligible.length)} advance`:unlocked?'Awaiting official finalized scores — provisional values do not advance golfers':'Waiting for previous round';
+  if(complete){finished++;eligible=ranked.slice(0,cutoff);}else eligible=[];
+ }
+ $('status').textContent=finished+' of 3 qualifying rounds finalized';
+ const last=weeks.playoff.get(4),fr=new Map(rounds.filter(x=>x.week_id===last?.id).map(x=>[x.golfer_id,x]));
+ const finalists=eligible.map(p=>({...p,net:net(fr.get(p.id))})).sort((a,b)=>(a.net??Infinity)-(b.net??Infinity)||a.seed-b.seed);
+ const complete=Boolean(last&&last.status==='finalized'&&finalists.length&&finalists.every(p=>fr.get(p.id)?.finalized&&p.net!==null));
+ $('final').innerHTML=finalists.length?table(finalists.map((p,i)=>`<tr><td>${complete?i+1:'—'}</td><td><strong>${esc(p.name)}</strong></td><td>${show(p.net)}</td></tr>`),['PLACE','FINALIST','CHAMPIONSHIP NET']):'<p class="empty-message">The Final Four will appear after Round 3 is finalized.</p>';
+ const winners=complete?finalists.filter(p=>p.net===finalists[0].net):[];
+ $('champion').textContent=!complete?'Championship awaits the Final Four':winners.length===1?'CHAMPION: '+winners[0].name:'TIED FOR CHAMPIONSHIP: '+winners.map(p=>p.name).join(' / ');
+ $('champion-note').textContent='Official Supabase results only. Playoff scoring and finalization must be implemented separately.';
 }
-document.addEventListener('change',e=>{const t=e.target;if(t.dataset.round){const d=load(PLAYOFF);d.rounds||={};d.rounds[t.dataset.round]||={};if(t.value==='')delete d.rounds[t.dataset.round][t.dataset.id];else d.rounds[t.dataset.round][t.dataset.id]=t.value;for(let r=Number(t.dataset.round)+1;r<=3;r++)delete d.rounds[r];delete d.final;save(d);render();}else if(t.dataset.final){const d=load(PLAYOFF);d.final||={};if(t.value==='')delete d.final[t.dataset.final];else d.final[t.dataset.final]=t.value;save(d);render();}});
-$('reset-playoffs').addEventListener('click',()=>{if(confirm('Delete all locally saved playoff scores? Regular-season results will remain untouched.')){localStorage.removeItem(PLAYOFF);render()}});
-window.addEventListener('storage',render);render();
+async function init(){
+ if(!window.supabase?.createClient||!window.BB_SUPABASE_CONFIG)throw Error('Supabase configuration is missing');
+ const db=window.supabase.createClient(window.BB_SUPABASE_CONFIG.url,window.BB_SUPABASE_CONFIG.publishableKey);
+ const {data:leagues,error:e}=await db.from('leagues').select('id').eq('season',2027).eq('name','Bogus Boys').limit(1);if(e)throw e;if(!leagues?.length)throw Error('2027 league not found');
+ const id=leagues[0].id;
+ const [golfers,weekRows]=await Promise.all([all(db.from('golfers').select('id,display_name,flight,kind,active').eq('league_id',id).order('id'),'Golfers'),all(db.from('weeks').select('id,week_type,week_number,status').eq('league_id',id).order('id'),'Weeks')]);
+ const regIds=new Set(weekRows.filter(w=>w.week_type==='regular'&&w.status==='finalized').map(w=>w.id));
+ const playoff=new Map(weekRows.filter(w=>w.week_type==='playoff').map(w=>[w.week_number,w]));
+ const ids=[...regIds,...[...playoff.values()].map(w=>w.id)];let rounds=[];
+ for(let i=0;i<ids.length;i+=40){rounds.push(...await all(db.from('rounds').select('week_id,golfer_id,gross_score,handicap_used,bb_points,finalized').in('week_id',ids.slice(i,i+40)).order('week_id').order('golfer_id'),'Rounds'));}
+ render(golfers,{regIds,playoff},rounds);
+}
+init().catch(e=>{console.error(e);$('status').textContent='Unable to load live playoffs';$('seeds').textContent='Supabase error: '+e.message;});
 })();
