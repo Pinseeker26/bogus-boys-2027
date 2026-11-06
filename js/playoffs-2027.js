@@ -60,7 +60,41 @@ async function init(){
  const playoff=new Map(weekRows.filter(w=>w.week_type==='playoff').map(w=>[w.week_number,w]));
  const ids=[...regIds,...[...playoff.values()].map(w=>w.id)];let rounds=[];
  for(let i=0;i<ids.length;i+=40){rounds.push(...await all(db.from('rounds').select('week_id,golfer_id,gross_score,handicap_used,bb_points,finalized').in('week_id',ids.slice(i,i+40)).order('week_id').order('golfer_id'),'Rounds'));}
- render(golfers,{regIds,playoff},rounds);
+ editor.golfers=golfers;editor.weeks={regIds,playoff};editor.rounds=rounds;
+ render(golfers,editor.weeks,rounds);
 }
+
+document.addEventListener('change',async event=>{
+ const input=event.target;
+ if(!input.matches('[data-score-week][data-score-golfer][data-score-field]')||!editor?.commissioner)return;
+ const status=$('playoff-edit-status');
+ const week=[...editor.weeks.playoff.values()].find(w=>w.id===input.dataset.scoreWeek);
+ if(!week||week.status!=='open'){status.textContent='NOT SAVED: Week is locked.';return;}
+ const field=input.dataset.scoreField,raw=input.value.trim(),value=raw===''?null:Number(raw);
+ if(value!==null&&(!Number.isFinite(value)||(field==='gross_score'&&(!Number.isInteger(value)||value<9||value>100))||(field==='handicap_used'&&(value< -20||value>40)))){
+   status.textContent='NOT SAVED: Invalid score or handicap.';return;
+ }
+ input.disabled=true;status.textContent='Saving to Supabase…';
+ try{
+   const existing=editor.rounds.find(r=>r.week_id===week.id&&r.golfer_id===input.dataset.scoreGolfer);
+   if(!existing&&value===null){status.textContent='Nothing to save.';return;}
+   const q=existing
+     ?editor.db.from('rounds').update({[field]:value}).eq('week_id',week.id).eq('golfer_id',input.dataset.scoreGolfer).eq('finalized',false)
+     :editor.db.from('rounds').insert({week_id:week.id,golfer_id:input.dataset.scoreGolfer,[field]:value,finalized:false});
+   const {data,error}=await q.select('week_id,golfer_id,gross_score,handicap_used,bb_points,finalized');
+   if(error)throw error;
+   if(!data?.length)throw Error('No row was saved. Check database permissions.');
+   const saved=data[0],i=editor.rounds.findIndex(r=>r.week_id===saved.week_id&&r.golfer_id===saved.golfer_id);
+   if(i>=0)editor.rounds[i]=saved;else editor.rounds.push(saved);
+   render(editor.golfers,editor.weeks,editor.rounds);
+   status.textContent='SAVED TO SUPABASE: '+(saved.gross_score??'—')+' gross / '+(saved.handicap_used??'—')+' handicap. Provisional only.';
+ }catch(err){
+   input.disabled=false;
+   status.textContent='NOT SAVED: '+err.message;
+   console.error('Playoff score save failed:',err);
+ }
+ finally{input.disabled=false;}
+});
+
 init().catch(e=>{console.error(e);$('status').textContent='Unable to load live playoffs';$('seeds').textContent='Supabase error: '+e.message;});
 })();
