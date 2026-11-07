@@ -27,6 +27,9 @@ function render(golfers,weeks,rounds){
    const canEdit=Boolean(editor?.commissioner&&week?.status==='open'&&unlocked);
    const scoreCell=p=>canEdit?`<input type="number" min="9" max="100" step="1" style="width:70px" data-score-week="${esc(week.id)}" data-score-golfer="${esc(p.id)}" data-score-field="gross_score" value="${esc(rs.get(p.id)?.gross_score??'')}" aria-label="${esc(p.name)} gross score"> <input type="number" min="-20" max="40" step="0.01" style="width:66px" data-score-week="${esc(week.id)}" data-score-golfer="${esc(p.id)}" data-score-field="handicap_used" value="${esc(rs.get(p.id)?.handicap_used??'')}" aria-label="${esc(p.name)} handicap">`:show(p.net);
   $('round-'+r).innerHTML=unlocked?table(ranked.map((p,i)=>`<tr class="${complete&&i<cutoff?'advance':''}"><td>${i+1}</td><td><strong>${esc(p.name)}</strong>${complete&&i<cutoff?' <span class="qualifier">ADVANCES</span>':''}</td><td>${show(p.total-(p.award||0))}</td><td>${scoreCell(p)}</td><td>${show(p.place)}</td><td>${show(p.award)}</td><td class="gold-text">${show(p.total)}</td></tr>`),['RANK','GOLFER','POINTS IN',canEdit?'GROSS / HCP':'ROUND NET','FINISH','AWARDED','CUMULATIVE']):'<p class="empty-message">Waiting for the previous playoff round to be finalized.</p>';
+  if(canEdit){
+    $('round-'+r).insertAdjacentHTML('beforeend',`<p><button type="button" data-finalize-playoff="${esc(week.id)}" data-round="${r}" style="background:#ffb612;color:#111;border:0;border-radius:7px;padding:12px 18px;font-weight:800;cursor:pointer">FINALIZE ROUND ${r}</button></p>`);
+  }
   $('round-'+r+'-status').textContent=!week?'Playoff week missing from Supabase':complete?`Finalized · Top ${Math.min(cutoff,eligible.length)} advance`:unlocked?'Awaiting official finalized scores — provisional values do not advance golfers':'Waiting for previous round';
   if(complete){finished++;eligible=ranked.slice(0,cutoff);}else eligible=[];
  }
@@ -34,6 +37,9 @@ function render(golfers,weeks,rounds){
  const last=weeks.playoff.get(4),fr=new Map(rounds.filter(x=>x.week_id===last?.id).map(x=>[x.golfer_id,x]));
  const canEditFinal=Boolean(editor?.commissioner&&last?.status==='open'&&eligible.length);
   const finalists=eligible.map(p=>({...p,net:net(fr.get(p.id))})).sort((a,b)=>(a.net??Infinity)-(b.net??Infinity)||a.seed-b.seed);
+ if(canEditFinal){
+   $('final').insertAdjacentHTML('beforeend',`<p><button type="button" data-finalize-playoff="${esc(last.id)}" data-round="4" style="background:#ffb612;color:#111;border:0;border-radius:7px;padding:12px 18px;font-weight:800;cursor:pointer">FINALIZE CHAMPIONSHIP</button></p>`);
+ }
  const complete=Boolean(last&&last.status==='finalized'&&finalists.length&&finalists.every(p=>fr.get(p.id)?.finalized&&p.net!==null));
  $('final').innerHTML=finalists.length?table(finalists.map((p,i)=>`<tr><td>${complete?i+1:'—'}</td><td><strong>${esc(p.name)}</strong></td><td>${canEditFinal?`<input type="number" min="9" max="100" step="1" style="width:70px" data-score-week="${esc(last.id)}" data-score-golfer="${esc(p.id)}" data-score-field="gross_score" value="${esc(fr.get(p.id)?.gross_score??'')}" aria-label="${esc(p.name)} championship gross"> <input type="number" min="-20" max="40" step="0.01" style="width:66px" data-score-week="${esc(last.id)}" data-score-golfer="${esc(p.id)}" data-score-field="handicap_used" value="${esc(fr.get(p.id)?.handicap_used??'')}" aria-label="${esc(p.name)} championship handicap">`:show(p.net)}</td></tr>`),['PLACE','FINALIST',canEditFinal?'GROSS / HCP':'CHAMPIONSHIP NET']):'<p class="empty-message">The Final Four will appear after Round 3 is finalized.</p>';
  const winners=complete?finalists.filter(p=>p.net===finalists[0].net):[];
@@ -53,7 +59,7 @@ async function init(){
     commissioner=(memberships||[]).some(m=>m.role==='commissioner');
   }
   editor={db,commissioner,id};
-  $('playoff-edit-status').textContent=commissioner?'COMMISSIONER: Enter gross and handicap. Saves automatically. Do NOT finalize playoff weeks yet.':'VIEW ONLY: Commissioner sign-in required for score entry.';
+  $('playoff-edit-status').textContent=commissioner?'COMMISSIONER: Enter gross and handicap. Saves automatically. Check all scores before finalizing a playoff round.':'VIEW ONLY: Commissioner sign-in required for score entry.';
 
  const [golfers,weekRows]=await Promise.all([all(db.from('golfers').select('id,display_name,flight,kind,active').eq('league_id',id).order('id'),'Golfers'),all(db.from('weeks').select('id,week_type,week_number,status').eq('league_id',id).order('id'),'Weeks')]);
  const regIds=new Set(weekRows.filter(w=>w.week_type==='regular'&&w.status==='finalized').map(w=>w.id));
@@ -96,5 +102,24 @@ document.addEventListener('change',async event=>{
  finally{input.disabled=false;}
 });
 
+document.addEventListener('click',async event=>{
+  const button=event.target.closest('[data-finalize-playoff]');
+  if(!button||!editor?.commissioner)return;
+  const round=Number(button.dataset.round);
+  if(!confirm(`Finalize Playoff Round ${round}? All qualifying golfers must have scores. This permanently locks the round. This cannot be undone from the website.`))return;
+  button.disabled=true;
+  const status=$('playoff-edit-status');
+  status.textContent=`Finalizing playoff round ${round}…`;
+  try{
+    const {data,error}=await editor.db.rpc('bb_finalize_playoff_week',{p_week_id:button.dataset.finalizePlayoff});
+    if(error)throw error;
+    status.textContent=`ROUND ${round} FINALIZED: ${data} golfer(s). Refreshing…`;
+    window.location.reload();
+  }catch(err){
+    status.textContent='FINALIZATION FAILED: '+err.message;
+    button.disabled=false;
+    console.error(err);
+  }
+});
 init().catch(e=>{console.error(e);$('status').textContent='Unable to load live playoffs';$('seeds').textContent='Supabase error: '+e.message;});
 })();
