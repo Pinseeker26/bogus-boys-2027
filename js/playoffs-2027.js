@@ -1,4 +1,4 @@
-/* Bogus Boys 2027 - official Supabase playoff scoring and automatic handicap calculation. */
+/* Bogus Boys 2027 - official Supabase playoff viewer. Live Supabase playoff scoring. */
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -75,32 +75,10 @@ function render(golfers,weeks,rounds){
  }
  const winners=complete?finalists.filter(p=>p.net===finalists[0].net):[];
  $('champion').textContent=!complete?'Championship awaits the Final Four':winners.length===1?'CHAMPION: '+winners[0].name:'TIED FOR CHAMPIONSHIP: '+winners.map(p=>p.name).join(' / ');
- 
-const tiedChampions=complete?finalists.filter(p=>p.net===finalists[0].net):[];
-const declaredWinner=editor?.championshipDecision;
-const championBox=$('champion');
-
-if(complete&&tiedChampions.length>1){
-  const winner=tiedChampions.find(p=>p.id===declaredWinner);
-
-  if(winner){
-    championBox.textContent='CHAMPION: '+winner.name+' (Scorecard Tiebreaker)';
-  }else if(editor?.commissioner){
-    championBox.innerHTML=
-      '<strong>CHAMPIONSHIP TIE — COMMISSIONER DECISION REQUIRED</strong><br>'+
-      '<select id="championship-winner-select" style="margin:10px;padding:8px">'+
-      '<option value="">Select the scorecard playoff winner</option>'+
-      tiedChampions.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>').join('')+
-      '</select>'+
-      '<button type="button" id="declare-champion-btn" style="padding:10px;background:#ffb612;color:#111;font-weight:bold;border:0;border-radius:6px;cursor:pointer">DECLARE CHAMPION</button>';
-  }
-}
-
  $('champion-note').textContent=complete?'Official championship results — scores finalized and locked.':'Official Supabase playoff results. Scores become official when finalized.';
 }
 async function init(){
  if(!window.supabase?.createClient||!window.BB_SUPABASE_CONFIG)throw Error('Supabase configuration is missing');
-  if(!window.BBHandicap2027?.calculateLeagueHandicap)throw Error('Handicap engine is missing');
  const db=window.supabase.createClient(window.BB_SUPABASE_CONFIG.url,window.BB_SUPABASE_CONFIG.publishableKey);
  const {data:leagues,error:e}=await db.from('leagues').select('id').eq('season',2027).eq('name','Bogus Boys').limit(1);if(e)throw e;if(!leagues?.length)throw Error('2027 league not found');
  const id=leagues[0].id;
@@ -118,18 +96,7 @@ async function init(){
  const regIds=new Set(weekRows.filter(w=>w.week_type==='regular'&&w.status==='finalized').map(w=>w.id));
  const playoff=new Map(weekRows.filter(w=>w.week_type==='playoff').map(w=>[w.week_number,w]));
  const ids=[...regIds,...[...playoff.values()].map(w=>w.id)];let rounds=[];
- for(let i=0;i<ids.length;i+=40){rounds.push(...await all(db.from('rounds').select('week_id,golfer_id,gross_score,handicap_used,bb_points,finalized,tee_box,course_rating,slope_rating').in('week_id',ids.slice(i,i+40)).order('week_id').order('golfer_id'),'Rounds'));} 
-const championshipWeek=playoff.get(4);
-editor.championshipDecision=null;
-if(championshipWeek){
-  const {data:decisions,error:decisionError}=await db
-    .from('bb_championship_tiebreakers')
-    .select('golfer_id')
-    .eq('week_id',championshipWeek.id)
-    .limit(1);
-  if(decisionError)throw decisionError;
-  editor.championshipDecision=decisions?.[0]?.golfer_id||null;
-}
+ for(let i=0;i<ids.length;i+=40){rounds.push(...await all(db.from('rounds').select('week_id,golfer_id,gross_score,handicap_used,bb_points,finalized,tee_box,course_rating,slope_rating').in('week_id',ids.slice(i,i+40)).order('week_id').order('golfer_id'),'Rounds'));}
  editor.golfers=golfers;editor.weeks={regIds,playoff};editor.rounds=rounds;
  editor.chronology=weekRows.filter(w=>w.week_type==='regular'||w.week_type==='playoff').sort((a,b)=>{
   // Regular-season weeks always precede playoffs; within each stage, use week number.
@@ -155,7 +122,6 @@ document.addEventListener('change',async event=>{
   editor.pendingTees=editor.pendingTees||new Map();
   editor.pendingTees.set(teeSelect.dataset.playoffTee,selected);
   $('playoff-edit-status').textContent='Tee selected. Enter gross score to save the tee, rating, slope, and automatic handicap.';
-  const gross=document.querySelector(`[data-score-week="${week.id}"][data-score-golfer="${teeSelect.dataset.playoffTee}"][data-score-field="gross_score"]`);if(gross?.value.trim())gross.dispatchEvent(new Event('change',{bubbles:true}));
   return;
  }
 
@@ -224,56 +190,5 @@ document.addEventListener('click',async event=>{
     console.error(err);
   }
 });
- 
-document.addEventListener('click',async event=>{
-  const button=event.target.closest('#declare-champion-btn');
-  if(!button||!editor?.commissioner)return;
-
-  const select=$('championship-winner-select');
-  const golferId=select?.value;
-  if(!golferId){
-    alert('Select the scorecard playoff winner first.');
-    return;
-  }
-
-  const week=editor.weeks.playoff.get(4);
-  if(!week||week.status!=='finalized'){
-    alert('The championship must be finalized first.');
-    return;
-  }
-
-  const tied=editor.rounds.filter(r=>
-    r.week_id===week.id&&r.finalized&&
-    r.gross_score!=null&&r.handicap_used!=null
-  );
-  const lowest=Math.min(...tied.map(r=>Number(r.gross_score)-Number(r.handicap_used)));
-  const eligible=tied.filter(r=>Number(r.gross_score)-Number(r.handicap_used)===lowest);
-
-  if(eligible.length<2||!eligible.some(r=>r.golfer_id===golferId)){
-    alert('The selected golfer is not tied for the championship.');
-    return;
-  }
-
-  if(!confirm('Declare this golfer the official Bogus Boys Champion?'))return;
-
-  button.disabled=true;
-  try{
-    const {error}=await editor.db
-      .from('bb_championship_tiebreakers')
-      .insert({
-        week_id:week.id,
-        golfer_id:golferId,
-        decided_by:(await editor.db.auth.getUser()).data.user.id
-      });
-
-    if(error)throw error;
-    editor.championshipDecision=golferId;
-    render(editor.golfers,editor.weeks,editor.rounds);
-  }catch(err){
-    alert('Champion was NOT saved: '+err.message);
-    button.disabled=false;
-  }
-});
-     
 init().catch(e=>{console.error(e);$('status').textContent='Unable to load live playoffs';$('seeds').textContent='Supabase error: '+e.message;});
 })();
