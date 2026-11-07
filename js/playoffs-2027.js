@@ -123,6 +123,7 @@ document.addEventListener('change',async event=>{
   editor.pendingTees=editor.pendingTees||new Map();
   editor.pendingTees.set(teeSelect.dataset.playoffTee,selected);
   $('playoff-edit-status').textContent='Tee selected. Enter gross score to save the tee, rating, slope, and automatic handicap.';
+  const gross=document.querySelector(`[data-score-week="${week.id}"][data-score-golfer="${teeSelect.dataset.playoffTee}"][data-score-field="gross_score"]`);if(gross?.value.trim())gross.dispatchEvent(new Event('change',{bubbles:true}));
   return;
  }
 
