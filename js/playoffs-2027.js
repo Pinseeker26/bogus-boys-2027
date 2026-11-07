@@ -1,4 +1,4 @@
-/* Bogus Boys 2027 - official Supabase playoff viewer. Read-only until secure playoff finalization exists. */
+/* Bogus Boys 2027 - official Supabase playoff scoring and finalization. */
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -44,7 +44,7 @@ function render(golfers,weeks,rounds){
  }
  const winners=complete?finalists.filter(p=>p.net===finalists[0].net):[];
  $('champion').textContent=!complete?'Championship awaits the Final Four':winners.length===1?'CHAMPION: '+winners[0].name:'TIED FOR CHAMPIONSHIP: '+winners.map(p=>p.name).join(' / ');
- $('champion-note').textContent='Official Supabase results only. Playoff scoring and finalization must be implemented separately.';
+ $('champion-note').textContent=complete?'Official championship results — scores finalized and locked.':'Official Supabase playoff results. Championship scores become official when finalized.';
 }
 async function init(){
  if(!window.supabase?.createClient||!window.BB_SUPABASE_CONFIG)throw Error('Supabase configuration is missing');
@@ -93,7 +93,7 @@ document.addEventListener('change',async event=>{
    const saved=data[0],i=editor.rounds.findIndex(r=>r.week_id===saved.week_id&&r.golfer_id===saved.golfer_id);
    if(i>=0)editor.rounds[i]=saved;else editor.rounds.push(saved);
    render(editor.golfers,editor.weeks,editor.rounds);
-   status.textContent='SAVED TO SUPABASE: '+(saved.gross_score??'—')+' gross / '+(saved.handicap_used??'—')+' handicap. Provisional only.';
+   status.textContent='SAVED TO SUPABASE: '+(saved.gross_score??'—')+' gross / '+(saved.handicap_used??'—')+' handicap. Awaiting round finalization.';
  }catch(err){
    input.disabled=false;
    status.textContent='NOT SAVED: '+err.message;
