@@ -17,9 +17,13 @@
 const main = document.querySelector('main');
 if (!main) return;
 
-// Hide the original page heading; keep the live standings heading.
-const oldHeader = document.querySelector('.hero');
-if (oldHeader) oldHeader.style.display = 'none';
+
+// Hide the original banner above the live standings.
+const oldBanner = document.querySelector('main')?.previousElementSibling;
+if (oldBanner && oldBanner.tagName !== 'HEADER') {
+  oldBanner.style.display = 'none';
+}
+
 
 const navigation = document.querySelector('header nav');
 
