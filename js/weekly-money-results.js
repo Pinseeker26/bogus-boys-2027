@@ -44,13 +44,15 @@
   `;
 
   
-const anchor = document.querySelector('.commissioner-control');
+
+const anchor = document.getElementById('lock-week');
 
 if (anchor) {
-  anchor.insertAdjacentElement('beforebegin', panel);
+  anchor.closest('section')?.insertAdjacentElement('beforebegin', panel);
 } else {
   document.querySelector('.results-page')?.append(panel);
 }
+
 
 
   const status = document.getElementById('live-money-status');
