@@ -18,11 +18,17 @@ const main = document.querySelector('main');
 if (!main) return;
 
 
-// Hide the original banner above the live standings.
-const oldBanner = document.querySelector('main')?.previousElementSibling;
-if (oldBanner && oldBanner.tagName !== 'HEADER') {
-  oldBanner.style.display = 'none';
-}
+
+// Remove the original Season BBPts banner without touching navigation.
+document.querySelectorAll('h1').forEach(heading => {
+  if (heading.closest('.bb-live-standings')) return;
+
+  if (heading.textContent.trim().toUpperCase().includes('BBPTS')) {
+    const banner = heading.closest('section') || heading.parentElement;
+    if (banner) banner.style.display = 'none';
+  }
+});
+
 
 
 const navigation = document.querySelector('header nav');
