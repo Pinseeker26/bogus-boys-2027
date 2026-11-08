@@ -43,13 +43,15 @@
     <div id="live-money-content"></div>
   `;
 
-  const anchor = document.getElementById('save-message');
+  
+const anchor = document.querySelector('.commissioner-control');
 
-  if (anchor?.parentElement) {
-    anchor.parentElement.insertAdjacentElement('beforebegin', panel);
-  } else {
-    document.querySelector('main')?.append(panel);
-  }
+if (anchor) {
+  anchor.insertAdjacentElement('beforebegin', panel);
+} else {
+  document.querySelector('.results-page')?.append(panel);
+}
+
 
   const status = document.getElementById('live-money-status');
   const content = document.getElementById('live-money-content');
