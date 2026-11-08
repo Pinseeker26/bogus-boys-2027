@@ -13,23 +13,8 @@
     })[c]
   );
 
-  
 const main = document.querySelector('main');
 if (!main) return;
-
-
-
-// Remove the original Season BBPts banner without touching navigation.
-document.querySelectorAll('h1').forEach(heading => {
-  if (heading.closest('.bb-live-standings')) return;
-
-  if (heading.textContent.trim().toUpperCase().includes('BBPTS')) {
-    const banner = heading.closest('section') || heading.parentElement;
-    if (banner) banner.style.display = 'none';
-  }
-});
-
-
 
 const navigation = document.querySelector('header nav');
 
@@ -51,8 +36,6 @@ if (navigation) {
   // Replace the old demo interface, including its sample players.
   main.innerHTML = `
     <section class="bb-live-standings">
-      <p class="bb-eyebrow">THE RACE TO THE PLAYOFFS</p>
-      <h1>SEASON <span>BBPts</span></h1>
       <p>All 16 regular-season weeks count.
          Official points are recorded when each week is finalized.</p>
 
