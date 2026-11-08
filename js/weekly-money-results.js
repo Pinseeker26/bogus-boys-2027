@@ -58,7 +58,23 @@
 
   async function render() {
     const request = ++requestNumber;
-    const weekId = weekSelect.value;
+    
+const selectedWeek = weekSelect.value;
+const { data: weekRecord, error: weekError } = await db
+  .from('weeks')
+  .select('id')
+  .eq('league_id', LEAGUE)
+  .eq('week_type', 'regular')
+  .eq('week_number', Number(selectedWeek))
+  .single();
+
+if (weekError) {
+  status.textContent = 'Unable to find week: ' + weekError.message;
+  return;
+}
+
+const weekId = weekRecord.id;
+
 
     if (!weekId) {
       status.textContent = 'Choose a week to see Money Hole results.';
