@@ -483,4 +483,131 @@
 
   await loadMostWeeklyVictories();
 
+  // Most Consistent Golfer — finalized regular-season net scores.
+  // Minimum 8 rounds. Lowest standard deviation wins.
+
+  async function loadMostConsistentGolfer() {
+    const element = document.getElementById('most-consistent-award');
+    if (!element) return;
+
+    if (!window.supabase?.createClient ||
+        !cfg?.url || !cfg?.publishableKey) {
+      element.textContent = 'Results unavailable';
+      return;
+    }
+
+    try {
+      const client = window.supabase.createClient(
+        cfg.url, cfg.publishableKey
+      );
+
+      const [weeksResult, golfersResult] = await Promise.all([
+        client.from('weeks')
+          .select('id,status')
+          .eq('league_id', LEAGUE)
+          .eq('week_type', 'regular'),
+
+        client.from('golfers')
+          .select('id,display_name,kind')
+          .eq('league_id', LEAGUE)
+      ]);
+
+      if (weeksResult.error) throw weeksResult.error;
+      if (golfersResult.error) throw golfersResult.error;
+
+      const finalizedWeeks = (weeksResult.data || [])
+        .filter(w => w.status === 'finalized')
+        .map(w => w.id);
+
+      if (!finalizedWeeks.length) {
+        element.textContent = 'To Be Determined';
+        return;
+      }
+
+      const members = new Map(
+        (golfersResult.data || [])
+          .filter(g => g.kind === 'member')
+          .map(g => [g.id, g.display_name])
+      );
+
+      const { data: rounds, error } = await client
+        .from('rounds')
+        .select(
+          'week_id,golfer_id,gross_score,handicap_used,finalized'
+        )
+        .in('week_id', finalizedWeeks)
+        .eq('finalized', true);
+
+      if (error) throw error;
+
+      const scores = new Map();
+
+      for (const round of rounds || []) {
+        if (!members.has(round.golfer_id)) continue;
+        if (round.gross_score == null ||
+            round.handicap_used == null) continue;
+
+        const net = Number(round.gross_score) -
+          Number(round.handicap_used);
+
+        if (!Number.isFinite(net)) continue;
+
+        if (!scores.has(round.golfer_id)) {
+          scores.set(round.golfer_id, []);
+        }
+
+        scores.get(round.golfer_id).push(net);
+      }
+
+      const qualified = [];
+
+      for (const [id, values] of scores) {
+        if (values.length < 8) continue;
+
+        const average = values.reduce(
+          (sum, value) => sum + value, 0
+        ) / values.length;
+
+        const variance = values.reduce(
+          (sum, value) => sum +
+            Math.pow(value - average, 2), 0
+        ) / values.length;
+
+        qualified.push({
+          name: members.get(id),
+          deviation: Math.sqrt(variance)
+        });
+      }
+
+      if (!qualified.length) {
+        element.textContent = 'To Be Determined';
+        return;
+      }
+
+      const lowest = Math.min(
+        ...qualified.map(p => p.deviation)
+      );
+
+      // Compare at two decimal places for tied awards.
+      const roundedLowest = lowest.toFixed(2);
+
+      const leaders = qualified
+        .filter(p =>
+          p.deviation.toFixed(2) === roundedLowest
+        )
+        .map(p => p.name)
+        .sort((a, b) => a.localeCompare(b));
+
+      element.textContent =
+        leaders.join(' / ') +
+        ' — ' + roundedLowest + ' SD';
+
+    } catch (error) {
+      console.error('Most Consistent Golfer error:', error);
+      element.textContent = 'Results unavailable';
+    }
+  }
+
+  await loadMostConsistentGolfer();
+
 })();
