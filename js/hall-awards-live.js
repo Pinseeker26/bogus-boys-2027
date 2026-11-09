@@ -1039,6 +1039,59 @@
         award(contest.winner_golfer_id, pot);
       }
 
+      // Championship winnings — official Commissioner-confirmed Top Four.
+      // Count awarded prizes regardless of whether cash has been collected.
+      const [
+        championshipResultsResponse,
+        championshipPaymentsResponse
+      ] = await Promise.all([
+        client.from('bb_championship_results')
+          .select('golfer_id,finishing_position')
+          .eq('league_id', LEAGUE),
+
+        client.from('bb_finance_payments')
+          .select('amount_cents')
+          .eq('league_id', LEAGUE)
+          .eq('payment_type', 'championship')
+      ]);
+
+      if (championshipResultsResponse.error) {
+        throw championshipResultsResponse.error;
+      }
+
+      if (championshipPaymentsResponse.error) {
+        throw championshipPaymentsResponse.error;
+      }
+
+      const championshipResults =
+        championshipResultsResponse.data || [];
+
+      // Only award championship money after all four
+      // finishing positions have been officially confirmed.
+      if (championshipResults.length === 4) {
+        const potCents = (
+          championshipPaymentsResponse.data || []
+        ).reduce(
+          (sum, payment) =>
+            sum + Number(payment.amount_cents || 0),
+          0
+        );
+
+        const percentages = [40, 30, 20, 10];
+
+        for (const result of championshipResults) {
+          const position = Number(result.finishing_position);
+
+          if (position < 1 || position > 4) continue;
+
+          const prizeCents = Math.floor(
+            potCents * percentages[position - 1] / 100
+          );
+
+          award(result.golfer_id, prizeCents / 100);
+        }
+      }
+
       const ranked = members
         .map(g => ({
           name: g.display_name,
