@@ -742,4 +742,154 @@
 
   await loadMostImprovedGolfer();
 
+  // Perfect Attendance and Bogus Boys Ironman.
+  // Only finalized regular-season rounds count.
+
+  async function loadAttendanceAwards() {
+    const perfectElement =
+      document.getElementById('perfect-attendance-award');
+    const ironmanElement =
+      document.getElementById('ironman-award');
+
+    if (!perfectElement || !ironmanElement) return;
+
+    const setStatus = message => {
+      perfectElement.textContent = message;
+      ironmanElement.textContent = message;
+    };
+
+    if (!window.supabase?.createClient ||
+        !cfg?.url || !cfg?.publishableKey) {
+      setStatus('Results unavailable');
+      return;
+    }
+
+    try {
+      const client = window.supabase.createClient(
+        cfg.url, cfg.publishableKey
+      );
+
+      const [weeksResult, golfersResult] = await Promise.all([
+        client.from('weeks')
+          .select('id,week_number,status')
+          .eq('league_id', LEAGUE)
+          .eq('week_type', 'regular'),
+
+        client.from('golfers')
+          .select('id,display_name,kind')
+          .eq('league_id', LEAGUE)
+      ]);
+
+      if (weeksResult.error) throw weeksResult.error;
+      if (golfersResult.error) throw golfersResult.error;
+
+      const finalizedWeeks = (weeksResult.data || [])
+        .filter(w => w.status === 'finalized');
+
+      if (!finalizedWeeks.length) {
+        setStatus('To Be Determined');
+        return;
+      }
+
+      const weekNumbers = new Map(
+        finalizedWeeks.map(w => [
+          w.id, Number(w.week_number)
+        ])
+      );
+
+      const { data: rounds, error } = await client
+        .from('rounds')
+        .select('week_id,golfer_id,gross_score,finalized')
+        .in('week_id', finalizedWeeks.map(w => w.id))
+        .eq('finalized', true);
+
+      if (error) throw error;
+
+      const members = (golfersResult.data || [])
+        .filter(g => g.kind === 'member');
+
+      const played = new Map();
+
+      for (const round of rounds || []) {
+        if (round.gross_score == null) continue;
+
+        const weekNumber = weekNumbers.get(round.week_id);
+        if (!Number.isInteger(weekNumber) ||
+            weekNumber < 1 || weekNumber > 16) continue;
+
+        if (!played.has(round.golfer_id)) {
+          played.set(round.golfer_id, new Set());
+        }
+
+        played.get(round.golfer_id).add(weekNumber);
+      }
+
+      // Perfect Attendance requires all 16 completed weeks.
+      const perfect = members.filter(g => {
+        const weeks = played.get(g.id) || new Set();
+
+        return Array.from(
+          { length: 16 }, (_, i) => i + 1
+        ).every(number => weeks.has(number));
+      });
+
+      perfectElement.textContent = perfect.length
+        ? perfect
+            .map(g => g.display_name)
+            .sort((a, b) => a.localeCompare(b))
+            .join(' / ') + ' — 16 weeks'
+        : 'To Be Determined';
+
+      // Ironman: longest uninterrupted weekly playing streak.
+      function longestStreak(weekSet) {
+        let longest = 0;
+        let current = 0;
+
+        for (let week = 1; week <= 16; week++) {
+          if (weekSet.has(week)) {
+            current++;
+            longest = Math.max(longest, current);
+          } else {
+            current = 0;
+          }
+        }
+
+        return longest;
+      }
+
+      const streaks = members.map(g => ({
+        name: g.display_name,
+        streak: longestStreak(
+          played.get(g.id) || new Set()
+        )
+      }));
+
+      const best = Math.max(
+        0, ...streaks.map(g => g.streak)
+      );
+
+      if (best === 0) {
+        ironmanElement.textContent = 'To Be Determined';
+        return;
+      }
+
+      const leaders = streaks
+        .filter(g => g.streak === best)
+        .map(g => g.name)
+        .sort((a, b) => a.localeCompare(b));
+
+      ironmanElement.textContent =
+        leaders.join(' / ') +
+        ' — ' + best +
+        (best === 1 ? ' consecutive week' :
+          ' consecutive weeks');
+
+    } catch (error) {
+      console.error('Attendance Awards error:', error);
+      setStatus('Results unavailable');
+    }
+  }
+
+  await loadAttendanceAwards();
+
 })();
