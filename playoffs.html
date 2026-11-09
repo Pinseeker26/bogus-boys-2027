@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>2027 Playoffs | Bogus Boys</title><link href="css/home-2027.css" rel="stylesheet"/><link href="css/results-2027.css" rel="stylesheet"/><link href="css/playoffs-2027.css" rel="stylesheet"/></head><body><header class="top"><div class="wrap nav"><a class="identity" href="index.html"><img alt="Bogus Boys" src="images/bogus-boys-2027-logo.png"/><span>BOGUS BOYS <small>2027 GOLF LEAGUE</small></span></a>
+
 <nav aria-label="Main navigation">
   <a href="index.html">Home</a>
   <a href="this-week.html">This Week</a>
-  <a href="standings.html">BBPts</a>
-  <a href="weekly-results.html">Results</a>
-  <a href="playoffs.html" aria-current="page">Playoffs</a>
+  <a href="weekly-results.html">Weekly Results</a>
+  <a href="standings.html">Standings</a>
   <a href="players.html">Players</a>
+  <a href="handicaps.html">Handicaps</a>
   <a href="money-holes.html">Money Holes</a>
+  <a href="playoffs.html" aria-current="page">Playoffs</a>
   <a href="rules.html">Rules</a>
-  <a href="commissioner-hq.html">Commissioner</a>
+  <a href="commissioner-hq.html">Commissioner HQ</a>
 </nav>
+
 </div></header><div class="results-hero"><div class="wrap"><span class="kicker">ONE LEAGUE · ONE CHAMPION</span><h1>THE <em>PLAYOFFS</em></h1><p>Both flights combine. Four rounds. Everybody gets a shot.</p></div></div><div class="gold-line"></div><main class="wrap page-content results-page"><div class="notice">LIVE SUPABASE PLAYOFFS: Official results and commissioner scoring. Playoff handicaps update from earlier finalized league rounds.</div><p id="playoff-edit-status" class="round-status" role="status" aria-live="polite">Loading playoff scoring…</p><div class="playoff-cards"><article><small>ROUND 1 FIELD</small><strong id="seed-count">0</strong><span>Every registered golfer</span></article><article><small>ADVANCEMENT</small><strong>16 → 8 → 4</strong><span>Based on cumulative playoff points</span></article><article><small>PLAYOFF STATUS</small><strong id="status">—</strong><span>Net score breaks cutoff ties</span></article></div><section class="playoff-section"><div class="results-head"><div><span class="kicker">STARTING THE POSTSEASON</span><h2>Combined Re-Seeding</h2><p>Regular-season best-eight BBPts determine the combined seed order. Each golfer then starts the playoffs with re-seeding points: first seed receives 1,000, with 10 fewer per place (26th = 750). These re-seeding points count toward playoff advancement.</p></div></div><div id="seeds"></div></section><section class="playoff-section"><span class="kicker">PLAYOFF ROUND ONE</span><h2>Everybody Plays <span class="round-award">520 → 20</span></h2><p>Round 1 placement awards 520 for first, decreasing by 20 per place through 26th. Add those awards to re-seeding points. <strong>Top 16 advance.</strong></p><p class="round-status" id="round-1-status"></p><div id="round-1"></div></section><section class="playoff-section"><span class="kicker">PLAYOFF ROUND TWO</span><h2>Sweet Sixteen <span class="round-award">1,600 → 100</span></h2><p>Round 2 awards 1,600 for first, decreasing by 100 per place through 16th. Add these to all previous playoff points. <strong>Top 8 advance.</strong></p><p class="round-status" id="round-2-status"></p><div id="round-2"></div></section><section class="playoff-section"><span class="kicker">PLAYOFF ROUND THREE</span><h2>Elite Eight <span class="round-award">4,800 → 600</span></h2><p>Round 3 awards 4,800 / 4,200 / 3,600 / 3,000 / 2,400 / 1,800 / 1,200 / 600. Add these to all previous playoff points. <strong>Top 4 advance.</strong></p><p class="round-status" id="round-3-status"></p><div id="round-3"></div></section><section class="playoff-section final-section"><span class="kicker">PLAYOFF ROUND FOUR</span><h2>THE FINAL FOUR</h2><p>No more playoff points. The four finalists compete in <strong>straight LOW NET</strong>. Lowest net score wins the Bogus Boys Championship.</p>
 <div style="border-left:4px solid #ffb612;padding:12px 16px;margin:16px 0;background:#fff8e6;color:#222;border-radius:6px">
   <strong>CHAMPIONSHIP TIEBREAKER RULE</strong>
