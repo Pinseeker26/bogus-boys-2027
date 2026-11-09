@@ -20,4 +20,42 @@
   <p>If two or more golfers tie for the lowest net score, the Commissioner will conduct a scorecard playoff. Net scores will be compared over the last 6 holes, then the last 3 holes, then the final hole. If still tied, holes will be compared backward from the 8th hole until the tie is broken.</p>
   <strong>Only one golfer will be crowned Bogus Boys Champion.</strong>
 </div>
-<div id="final"></div><div class="champion-card"><small>2027 BOGUS BOYS CHAMPIONSHIP</small><strong id="champion">Championship awaits the Final Four</strong><span id="champion-note"></span></div></section><section class="playoff-section"><h2>Scoring &amp; Advancement Rules</h2><p>Tied round finishes split the combined points for the positions occupied. At the advancement cutoff, golfers tied on cumulative points are separated by their <strong>lowest net score in the most recent playoff round</strong>. If still tied, the higher original playoff seed is used as a provisional fallback so the field stays at 16, 8, or 4; confirm this secondary rule before going live.</p><p><strong>Commissioner note:</strong> All players must have a round net score entered before advancement becomes official. Finalized playoff scores are locked. Golfers remain on their Round 1 tees throughout the playoffs.</p></section></main><footer><div class="wrap footer"><div><strong>BOGUS BOYS</strong><small>2027 GOLF LEAGUE</small></div><span>ONE LEAGUE. ONE CHAMPION.</span></div></footer><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="js/supabase-config.js"></script><script src="js/handicap-engine-2027.js"></script><script src="js/playoffs-2027.js"></script></body></html>
+
+<div id="final"></div>
+
+<div id="championship-confirmation" class="playoff-section"
+     style="margin-top:24px;padding:20px;border:1px solid #d5a000;border-radius:10px">
+
+  <span class="kicker">OFFICIAL CHAMPIONSHIP RESULTS</span>
+  <h3>Commissioner-Confirmed Final Four</h3>
+
+  <p>
+    After Round 4 is finalized, the Commissioner confirms the
+    official finishing order, applying the scorecard playoff
+    tiebreaker whenever necessary.
+  </p>
+
+  <p id="championship-confirmation-status" class="round-status">
+    Awaiting finalized championship results.
+  </p>
+
+  <div id="championship-confirmation-results"></div>
+
+  <div id="championship-confirmation-editor" hidden>
+    <p><strong>Commissioner Only:</strong>
+      Select the official finishing positions below.
+    </p>
+
+    <div id="championship-confirmation-fields"></div>
+
+    <button type="button" id="save-championship-results"
+      style="background:#ffb612;color:#111;border:0;border-radius:7px;
+             padding:12px 18px;font-weight:800;cursor:pointer">
+      SAVE OFFICIAL TOP FOUR
+    </button>
+  </div>
+
+</div>
+
+<div class="champion-card">
+<small>2027 BOGUS BOYS CHAMPIONSHIP</small><strong id="champion">Championship awaits the Final Four</strong><span id="champion-note"></span></div></section><section class="playoff-section"><h2>Scoring &amp; Advancement Rules</h2><p>Tied round finishes split the combined points for the positions occupied. At the advancement cutoff, golfers tied on cumulative points are separated by their <strong>lowest net score in the most recent playoff round</strong>. If still tied, the higher original playoff seed is used as a provisional fallback so the field stays at 16, 8, or 4; confirm this secondary rule before going live.</p><p><strong>Commissioner note:</strong> All players must have a round net score entered before advancement becomes official. Finalized playoff scores are locked. Golfers remain on their Round 1 tees throughout the playoffs.</p></section></main><footer><div class="wrap footer"><div><strong>BOGUS BOYS</strong><small>2027 GOLF LEAGUE</small></div><span>ONE LEAGUE. ONE CHAMPION.</span></div></footer><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="js/supabase-config.js"></script><script src="js/handicap-engine-2027.js"></script><script src="js/playoffs-2027.js"></script></body></html>
