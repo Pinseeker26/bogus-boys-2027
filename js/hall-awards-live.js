@@ -892,4 +892,179 @@
 
   await loadAttendanceAwards();
 
+  // Money Kings — Top 3 league members by awarded winnings.
+  // Includes flight payouts and funded money-hole prizes.
+  // Championship prizes will be added when recipients are recorded.
+
+  async function loadMoneyKings() {
+    const places = [
+      document.getElementById('money-first'),
+      document.getElementById('money-second'),
+      document.getElementById('money-third')
+    ];
+
+    if (places.some(el => !el)) return;
+
+    const setAll = message => {
+      places.forEach(el => { el.textContent = message; });
+    };
+
+    if (!window.supabase?.createClient ||
+        !cfg?.url || !cfg?.publishableKey) {
+      setAll('Results unavailable');
+      return;
+    }
+
+    try {
+      const client = window.supabase.createClient(
+        cfg.url, cfg.publishableKey
+      );
+
+      const results = await Promise.all([
+        client.from('golfers')
+          .select('id,display_name,kind')
+          .eq('league_id', LEAGUE),
+
+        client.from('weeks')
+          .select('id,status')
+          .eq('league_id', LEAGUE),
+
+        client.from('money_flight_payouts')
+          .select('week_id,first_golfer_id,second_golfer_id,first_dollars,second_dollars')
+          .eq('league_id', LEAGUE),
+
+        client.from('money_contests')
+          .select('week_id,flight,funded_slot,winner_golfer_id,no_winner')
+          .eq('league_id', LEAGUE),
+
+        client.from('money_contributions')
+          .select('week_id,golfer_id,paid')
+          .eq('league_id', LEAGUE),
+
+        client.from('money_guest_flights')
+          .select('week_id,golfer_id,flight')
+          .eq('league_id', LEAGUE)
+      ]);
+
+      for (const result of results) {
+        if (result.error) throw result.error;
+      }
+
+      const [
+        golfers, weeks, flightPayouts,
+        contests, contributions, guestFlights
+      ] = results.map(r => r.data || []);
+
+      const golferMap = new Map(
+        golfers.map(g => [g.id, g])
+      );
+
+      const members = golfers.filter(
+        g => g.kind === 'member'
+      );
+
+      const finalizedWeeks = new Set(
+        weeks.filter(w => w.status === 'finalized')
+          .map(w => w.id)
+      );
+
+      const totals = new Map(
+        members.map(g => [g.id, 0])
+      );
+
+      function award(golferId, amount) {
+        if (!totals.has(golferId)) return;
+
+        const value = Number(amount);
+        if (!Number.isFinite(value) || value <= 0) return;
+
+        totals.set(
+          golferId,
+          totals.get(golferId) + value
+        );
+      }
+
+      // Official first- and second-place flight payouts.
+      for (const payout of flightPayouts) {
+        if (!finalizedWeeks.has(payout.week_id)) continue;
+
+        award(payout.first_golfer_id, payout.first_dollars);
+        award(payout.second_golfer_id, payout.second_dollars);
+      }
+
+      // Funded money-hole pots are $1 per paid participant
+      // in the assigned flight, including guest contributions.
+      const guestFlightMap = new Map(
+        guestFlights.map(g => [
+          g.week_id + ':' + g.golfer_id, g.flight
+        ])
+      );
+
+      const contributionCounts = new Map();
+
+      for (const contribution of contributions) {
+        if (!contribution.paid) continue;
+
+        const golfer = golferMap.get(contribution.golfer_id);
+        if (!golfer) continue;
+
+        const flight = golfer.kind === 'guest'
+          ? guestFlightMap.get(
+              contribution.week_id + ':' + golfer.id
+            )
+          : golfer.flight;
+
+        if (!flight) continue;
+
+        const key = contribution.week_id + ':' + flight;
+
+        contributionCounts.set(
+          key, (contributionCounts.get(key) || 0) + 1
+        );
+      }
+
+      for (const contest of contests) {
+        if (!finalizedWeeks.has(contest.week_id)) continue;
+        if (contest.no_winner || !contest.winner_golfer_id) {
+          continue;
+        }
+
+        const slot = Number(contest.funded_slot);
+        if (slot !== 1 && slot !== 2) continue;
+
+        const pot = contributionCounts.get(
+          contest.week_id + ':' + contest.flight
+        ) || 0;
+
+        award(contest.winner_golfer_id, pot);
+      }
+
+      const ranked = members
+        .map(g => ({
+          name: g.display_name,
+          winnings: totals.get(g.id) || 0
+        }))
+        .filter(g => g.winnings > 0)
+        .sort((a, b) =>
+          b.winnings - a.winnings ||
+          a.name.localeCompare(b.name)
+        );
+
+      places.forEach((element, index) => {
+        const golfer = ranked[index];
+
+        element.textContent = golfer
+          ? golfer.name + ' — $' +
+            golfer.winnings.toFixed(2)
+          : 'To Be Determined';
+      });
+
+    } catch (error) {
+      console.error('Money Kings error:', error);
+      setAll('Results unavailable');
+    }
+  }
+
+  await loadMoneyKings();
+
 })();
