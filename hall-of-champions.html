@@ -1,1 +1,319 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hall of Champions | Bogus Boys 2027</title><link rel="stylesheet" href="css/home-2027.css"><link rel="stylesheet" href="css/hall-2027.css"></head><body><header class="top"><div class="wrap nav"><a class="identity" href="index.html"><img src="images/bogus-boys-2027-logo.png" alt="Bogus Boys"><span>BOGUS BOYS<small>2027 GOLF LEAGUE</small></span></a><nav><a href="index.html">Home</a><a href="this-week.html">This Week</a><a href="weekly-results.html">Results</a><a href="standings.html">Standings</a><a href="playoffs.html">Playoffs</a><a class="current" href="hall-of-champions.html">Hall of Champions</a><a href="commissioner.html">Commissioner HQ</a></nav></div></header><section class="hall-hero"><div class="wrap"><span class="eyebrow">BOGUS BOYS • LEGACY</span><h1>HALL OF <span>CHAMPIONS</span></h1><p>Great rounds fade. Legends don't.</p></div></section><main class="wrap hall-main"><section class="featured"><div class="feature-icon">🏆</div><div><span class="eyebrow">2027 OVERALL LEAGUE CHAMPION</span><h2 id="featured-name">TO BE CROWNED</h2><p id="featured-sub">Four playoff rounds. One Bogus Boys champion.</p></div></section><section class="hall-section"><div class="section-head"><div><span class="eyebrow">THE HONOR ROLL</span><h2>Past Champions</h2></div><label class="filter">Season <select id="year-filter"><option value="all">All Seasons</option></select></label></div><div id="champion-list" class="champion-grid"></div></section><section class="hall-section"><div class="section-head"><div><span class="eyebrow">THE ARCHIVES</span><h2>Season Awards</h2></div></div><div id="award-list" class="champion-grid"></div></section><section class="hall-section editor" id="hall-editor"><div class="section-head"><div><span class="eyebrow">COMMISSIONER HQ • LOCAL PROTOTYPE</span><h2>Manage Hall Records</h2></div></div><p class="muted">Enter verified past champions and awards. Nothing is published automatically. This editor is not secured by a real login; use only for testing until the shared backend is built.</p><form id="hall-form"><input type="hidden" id="record-id"><div class="form-grid"><label>Season <input id="record-year" type="number" min="1900" max="2100" value="2026" required></label><label>Honor <select id="record-type"><option value="overall">Overall League Champion</option><option value="flightA">Flight A Regular-Season Champion</option><option value="flightB">Flight B Regular-Season Champion</option><option value="award">Season Award</option></select></label><label>Player name <input id="record-name" maxlength="100" required placeholder="Champion name"></label><label>Award name (for season awards) <input id="record-award" maxlength="100" placeholder="e.g. Most BBPts"></label><label class="wide">Notes / accomplishment <input id="record-note" maxlength="240" placeholder="Optional"></label><label class="wide">Photo URL (optional) <input id="record-photo" type="url" placeholder="https://example.com/photo.jpg"></label></div><div class="form-actions"><button type="submit">Save Hall Record</button><button type="button" id="reset-form" class="secondary">Clear Form</button><span id="hall-message" role="status"></span></div></form><h3>Saved Records</h3><div id="manage-list"></div></section></main><footer><div class="wrap footer"><div><strong>BOGUS BOYS</strong><small>2027 GOLF LEAGUE</small></div><span>PLAY HARD. EARN YOUR POINTS.</span></div></footer><script src="js/hall-2027.js"></script></body></html>
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hall of Champions | Bogus Boys 2027</title>
+<link rel="stylesheet" href="css/home-2027.css">
+<link rel="stylesheet" href="css/hall-2027.css">
+<style>
+.hall-podium {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+.hall-podium.three {
+  grid-template-columns: repeat(3,minmax(0,1fr));
+}
+.hall-place {
+  background: #111;
+  color: #fff;
+  border-top: 4px solid #ffb612;
+  border-radius: 10px;
+  padding: 22px 12px;
+  text-align: center;
+}
+.hall-place .medal {
+  font-size: 30px;
+  display: block;
+}
+.hall-place h3 {
+  color: #ffb612;
+  margin: 10px 0;
+}
+.hall-place p {
+  color: #fff;
+  margin: 0;
+}
+.hall-awards {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+.hall-award {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-top: 4px solid #ffb612;
+  border-radius: 9px;
+  padding: 20px;
+}
+.hall-award h3 {
+  margin: 0 0 10px;
+  color: #111;
+}
+.hall-award p {
+  margin: 0;
+  color: #555;
+}
+.hall-award .winner {
+  font-weight: bold;
+  color: #111;
+  margin-top: 14px;
+}
+.hall-note {
+  margin-top: 20px;
+  color: #555;
+}
+@media(max-width:750px) {
+  .hall-podium,
+  .hall-podium.three,
+  .hall-awards {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:440px) {
+  .hall-podium,
+  .hall-podium.three,
+  .hall-awards {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+<div class="wrap nav">
+<a class="identity" href="index.html">
+<img src="images/bogus-boys-2027-logo.png" alt="Bogus Boys">
+<span>BOGUS BOYS <small>2027 GOLF LEAGUE</small></span>
+</a>
+<nav id="links">
+<a href="index.html">Home</a>
+<a href="this-week.html">This Week</a>
+<a href="weekly-results.html">Weekly Results</a>
+<a href="standings.html">Standings</a>
+<a href="players.html">Players</a>
+<a href="handicaps.html">Handicaps</a>
+<a href="money-holes.html">Money Holes</a>
+<a href="playoffs.html">Playoffs</a>
+<a class="current" href="hall-of-champions.html">Hall of Champions</a>
+<a href="rules.html">Rules</a>
+<a href="commissioner-hq.html">Commissioner HQ</a>
+</nav>
+</div>
+</header>
+
+<section class="hall-hero">
+<div class="wrap">
+<span class="eyebrow">BOGUS BOYS • LEGACY</span>
+<h1>HALL OF <span>CHAMPIONS</span></h1>
+<p>Great rounds fade. Legends don't.</p>
+</div>
+</section>
+
+<main class="wrap hall-main">
+
+<section class="featured">
+<div class="feature-icon">🏆</div>
+<div>
+<span class="eyebrow">2027 LEAGUE CHAMPION</span>
+<h2>TO BE CROWNED</h2>
+<p>Four playoff rounds. One Bogus Boys champion.</p>
+</div>
+</section>
+
+<section class="hall-section">
+<div class="section-head">
+<div>
+<span class="eyebrow">THE CHAMPIONSHIP</span>
+<h2>2027 Championship — Top Four</h2>
+</div>
+</div>
+<div class="hall-podium">
+<div class="hall-place">
+<span class="medal">🥇</span>
+<h3>1st Place</h3>
+<p>To Be Crowned</p>
+</div>
+<div class="hall-place">
+<span class="medal">🥈</span>
+<h3>2nd Place</h3>
+<p>To Be Determined</p>
+</div>
+<div class="hall-place">
+<span class="medal">🥉</span>
+<h3>3rd Place</h3>
+<p>To Be Determined</p>
+</div>
+<div class="hall-place">
+<span class="medal">🏅</span>
+<h3>4th Place</h3>
+<p>To Be Determined</p>
+</div>
+</div>
+</section>
+
+<section class="hall-section">
+<div class="section-head">
+<div>
+<span class="eyebrow">THE MONEY KINGS</span>
+<h2>2027 Top Money Winners</h2>
+</div>
+</div>
+<p>League members only. Total prize money earned from official league competitions, money holes, playoffs, and championship payouts.</p>
+<div class="hall-podium three">
+<div class="hall-place">
+<span class="medal">🥇</span>
+<h3>1st Place</h3>
+<p>To Be Determined</p>
+</div>
+<div class="hall-place">
+<span class="medal">🥈</span>
+<h3>2nd Place</h3>
+<p>To Be Determined</p>
+</div>
+<div class="hall-place">
+<span class="medal">🥉</span>
+<h3>3rd Place</h3>
+<p>To Be Determined</p>
+</div>
+</div>
+</section>
+
+<section class="hall-section">
+<div class="section-head">
+<div>
+<span class="eyebrow">THE ACCURACY AWARDS</span>
+<h2>Money Hole Champions</h2>
+</div>
+</div>
+<div class="hall-awards">
+<article class="hall-award">
+<h3>🎯 CTP King</h3>
+<p>Most Closest-to-the-Pin victories.</p>
+<p class="winner">To Be Determined</p>
+</article>
+<article class="hall-award">
+<h3>⛳ Putting King</h3>
+<p>Most Longest Putt victories.</p>
+<p class="winner">To Be Determined</p>
+</article>
+</div>
+<p class="hall-note">Only official league members qualify. Regular-season and playoff money-hole victories count.</p>
+</section>
+
+<section class="hall-section">
+<div class="section-head">
+<div>
+<span class="eyebrow">THE SEASON HONORS</span>
+<h2>2027 League Awards</h2>
+</div>
+</div>
+<div class="hall-awards">
+
+<article class="hall-award">
+<h3>Flight A Champion</h3>
+<p>Highest regular-season BBPts in Flight A.</p>
+<p class="winner">To Be Determined</p>
+</article>
+
+<article class="hall-award">
+<h3>Flight B Champion</h3>
+<p>Highest regular-season BBPts in Flight B.</p>
+<p class="winner">To Be Determined</p>
+</article>
+
+<article class="hall-award">
+<h3>Lowest Gross Round</h3>
+<p>Lowest nine-hole gross score.</p>
+<p class="winner">To Be Determined</p>
+</article>
+
+<article class="hall-award">
+<h3>Lowest Net Round</h3>
+<p>Lowest nine-hole net score.</p>
+<p class="winner">To Be Determined</p>
+</article>
+
+<article class="hall-award">
+<h3>Most Weekly Victories</h3>
+<p>Most regular-season first-place finishes.</p>
+<p class="winner">To Be Determined</p>
+</article>
+
+<article class="hall-award">
+<h3>Most Consistent Golfer</h3>
+<p>Most consistent net scoring performance.</p>
+<p class="winner">To Be Determined</p>
+</article>
+
+<article class="hall-award">
+<h3>Most Improved Golfer</h3>
+<p>Greatest improvement in nine-hole handicap.</p>
+<p class="winner">To Be Determined</p>
+</article>
+
+<article class="hall-award">
+<h3>Perfect Attendance</h3>
+<p>Played all 16 regular-season weeks.</p>
+<p class="winner">To Be Determined</p>
+</article>
+
+<article class="hall-award">
+<h3>Bogus Boys Ironman</h3>
+<p>Longest consecutive regular-season playing streak.</p>
+<p class="winner">To Be Determined</p>
+</article>
+
+<article class="hall-award">
+<h3>Commissioner's Award</h3>
+<p>Special recognition selected by the Commissioner.</p>
+<p class="winner">To Be Determined</p>
+</article>
+
+<article class="hall-award">
+<h3>⭐ The Bogus Boys Legend</h3>
+<p>Lifetime recognition for exceptional contributions to the league.</p>
+<p class="winner">Awarded When Earned</p>
+</article>
+
+</div>
+</section>
+
+<section class="hall-section">
+<div class="section-head">
+<div>
+<span class="eyebrow">THE HONOR ROLL</span>
+<h2>Past League Champions</h2>
+</div>
+</div>
+
+<div class="champion-grid">
+<article class="champion-card">
+<span class="season">2026</span>
+<div class="eyebrow">BOGUS BOYS LEAGUE CHAMPION</div>
+<h3>Pat Konkle</h3>
+<p>2026 League Champion</p>
+</article>
+</div>
+
+</section>
+
+</main>
+
+<footer>
+<div class="wrap footer">
+<div>
+<strong>BOGUS BOYS</strong>
+<small>2027 GOLF LEAGUE</small>
+</div>
+<span>PLAY HARD. EARN YOUR POINTS.</span>
+</div>
+</footer>
+
+</body>
+</html>
