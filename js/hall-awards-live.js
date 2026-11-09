@@ -373,4 +373,114 @@
 
   await loadLowestRoundAwards();
 
+  // Most Weekly Victories — regular-season flight wins only.
+
+  async function loadMostWeeklyVictories() {
+    const element = document.getElementById('most-weekly-wins');
+    if (!element) return;
+
+    if (!window.supabase?.createClient ||
+        !cfg?.url || !cfg?.publishableKey) {
+      element.textContent = 'Results unavailable';
+      return;
+    }
+
+    try {
+      const client = window.supabase.createClient(
+        cfg.url, cfg.publishableKey
+      );
+
+      const [weeksResult, golfersResult] = await Promise.all([
+        client.from('weeks')
+          .select('id,status,week_type')
+          .eq('league_id', LEAGUE)
+          .eq('week_type', 'regular'),
+
+        client.from('golfers')
+          .select('id,display_name,flight,kind')
+          .eq('league_id', LEAGUE)
+      ]);
+
+      if (weeksResult.error) throw weeksResult.error;
+      if (golfersResult.error) throw golfersResult.error;
+
+      const finalizedWeeks = (weeksResult.data || [])
+        .filter(w => w.status === 'finalized');
+
+      if (!finalizedWeeks.length) {
+        element.textContent = 'To Be Determined';
+        return;
+      }
+
+      const members = new Map(
+        (golfersResult.data || [])
+          .filter(g => g.kind === 'member' &&
+            ['A', 'B'].includes(g.flight))
+          .map(g => [g.id, g])
+      );
+
+      const { data: rounds, error } = await client
+        .from('rounds')
+        .select('week_id,golfer_id,bb_points,finalized')
+        .in('week_id', finalizedWeeks.map(w => w.id))
+        .eq('finalized', true);
+
+      if (error) throw error;
+
+      const groups = new Map();
+
+      for (const round of rounds || []) {
+        const golfer = members.get(round.golfer_id);
+        if (!golfer || round.bb_points == null) continue;
+
+        const key = round.week_id + ':' + golfer.flight;
+
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push({
+          id: golfer.id,
+          points: Number(round.bb_points)
+        });
+      }
+
+      const wins = new Map();
+
+      for (const players of groups.values()) {
+        const highest = Math.max(...players.map(p => p.points));
+
+        for (const player of players) {
+          if (player.points !== highest) continue;
+
+          wins.set(
+            player.id,
+            (wins.get(player.id) || 0) + 1
+          );
+        }
+      }
+
+      if (!wins.size) {
+        element.textContent = 'To Be Determined';
+        return;
+      }
+
+      const highestWins = Math.max(...wins.values());
+
+      const leaders = [...wins.entries()]
+        .filter(([, count]) => count === highestWins)
+        .map(([id]) => members.get(id)?.display_name)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b));
+
+      element.textContent =
+        leaders.join(' / ') +
+        ' — ' + highestWins +
+        (highestWins === 1 ? ' victory' : ' victories');
+
+    } catch (error) {
+      console.error('Most Weekly Victories error:', error);
+      element.textContent = 'Results unavailable';
+    }
+  }
+
+  await loadMostWeeklyVictories();
+
 })();
