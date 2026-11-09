@@ -9,22 +9,14 @@
   const admin = $('hall-special-awards-admin');
   const status = $('hall-special-awards-status');
   const save = $('save-hall-special-awards');
-
-  const awards = [
-    {
-      type: 'commissioners_award',
-      select: $('commissioners-award-select'),
-      winner: $('commissioners-award-winner')
-    },
-    {
-      type: 'bogus_boys_legend',
-      select: $('bogus-boys-legend-select'),
-      winner: $('bogus-boys-legend-winner')
-    }
-  ];
+  const commissionerSelect = $('commissioners-award-select');
+  const legendSelect = $('bogus-boys-legend-select');
+  const commissionerWinner = $('commissioners-award-winner');
+  const legendWinner = $('bogus-boys-legend-winner');
 
   if (!admin || !status || !save ||
-      awards.some(a => !a.select || !a.winner)) return;
+      !commissionerSelect || !legendSelect ||
+      !commissionerWinner || !legendWinner) return;
 
   if (!window.supabase?.createClient ||
       !config?.url || !config?.publishableKey) return;
@@ -36,12 +28,15 @@
   let leagueId = null;
   let commissioner = false;
   let golfers = [];
+  let savedLegends = [];
+
+  const YEAR = 2027;
 
   async function load() {
     const { data: leagues, error: leagueError } = await db
       .from('leagues')
       .select('id')
-      .eq('season', 2027)
+      .eq('season', YEAR)
       .eq('name', 'Bogus Boys')
       .limit(1);
 
@@ -59,41 +54,68 @@
     if (golferError) throw golferError;
 
     golfers = (golferRows || []).filter(g => g.kind !== 'guest');
+
     const names = new Map(
       golfers.map(g => [g.id, g.display_name])
     );
 
     const { data: saved, error: savedError } = await db
       .from('bb_hall_special_awards')
-      .select('award_type,award_year,golfer_id')
-      .eq('league_id', leagueId)
-      .eq('award_year', 2027);
+      .select('id,award_type,award_year,golfer_id')
+      .eq('league_id', leagueId);
 
     if (savedError) throw savedError;
 
-    for (const award of awards) {
-      const record = (saved || []).find(
-        row => row.award_type === award.type
+    const allAwards = saved || [];
+
+    const commissionerAward = allAwards.find(
+      row => row.award_type === 'commissioners_award' &&
+             row.award_year === YEAR
+    );
+
+    commissionerWinner.textContent = commissionerAward
+      ? names.get(commissionerAward.golfer_id) ||
+        'Recipient unavailable'
+      : 'To Be Determined';
+
+    // Legends are lifetime honorees across all award years.
+    savedLegends = allAwards.filter(
+      row => row.award_type === 'bogus_boys_legend'
+    );
+
+    legendWinner.textContent = savedLegends.length
+      ? savedLegends
+          .sort((a, b) => a.award_year - b.award_year)
+          .map(row => names.get(row.golfer_id) ||
+               'Recipient unavailable')
+          .join(' • ')
+      : 'Awarded When Earned';
+
+    commissionerSelect.innerHTML =
+      '<option value="">Select recipient</option>';
+
+    legendSelect.innerHTML = '';
+
+    for (const golfer of golfers) {
+      const commissionerOption = document.createElement('option');
+      commissionerOption.value = golfer.id;
+      commissionerOption.textContent = golfer.display_name;
+      commissionerOption.selected =
+        commissionerAward?.golfer_id === golfer.id;
+      commissionerSelect.appendChild(commissionerOption);
+
+      const legendOption = document.createElement('option');
+      legendOption.value = golfer.id;
+      legendOption.textContent = golfer.display_name;
+      legendOption.selected = savedLegends.some(
+        row => row.golfer_id === golfer.id
       );
-
-      if (record) {
-        award.winner.textContent =
-          names.get(record.golfer_id) || 'Recipient unavailable';
-      }
-
-      award.select.innerHTML =
-        '<option value="">Select recipient</option>';
-
-      for (const golfer of golfers) {
-        const option = document.createElement('option');
-        option.value = golfer.id;
-        option.textContent = golfer.display_name;
-        option.selected = record?.golfer_id === golfer.id;
-        award.select.appendChild(option);
-      }
+      legendSelect.appendChild(legendOption);
     }
 
     const { data: auth } = await db.auth.getUser();
+
+    commissioner = false;
 
     if (auth?.user) {
       const { data: memberships, error } = await db
@@ -116,34 +138,73 @@
   save.addEventListener('click', async () => {
     if (!commissioner || !leagueId) return;
 
-    const selected = awards.filter(a => a.select.value);
+    const commissionerId = commissionerSelect.value;
 
-    if (!selected.length) {
-      status.textContent = 'Select at least one recipient.';
-      return;
-    }
+    const selectedLegendIds = [
+      ...legendSelect.selectedOptions
+    ].map(option => option.value);
 
     save.disabled = true;
     status.textContent = 'Saving special awards…';
 
     try {
-      const rows = selected.map(a => ({
-        league_id: leagueId,
-        award_year: 2027,
-        award_type: a.type,
-        golfer_id: a.select.value
-      }));
+      // Save or change the annual Commissioner's Award.
+      if (commissionerId) {
+        const { data: existing, error: lookupError } = await db
+          .from('bb_hall_special_awards')
+          .select('id')
+          .eq('league_id', leagueId)
+          .eq('award_year', YEAR)
+          .eq('award_type', 'commissioners_award')
+          .maybeSingle();
 
-      const { error } = await db
-        .from('bb_hall_special_awards')
-        .upsert(rows, {
-          onConflict: 'league_id,award_year,award_type'
-        });
+        if (lookupError) throw lookupError;
 
-      if (error) throw error;
+        const record = {
+          league_id: leagueId,
+          award_year: YEAR,
+          award_type: 'commissioners_award',
+          golfer_id: commissionerId
+        };
+
+        const query = existing
+          ? db.from('bb_hall_special_awards')
+              .update({ golfer_id: commissionerId })
+              .eq('id', existing.id)
+          : db.from('bb_hall_special_awards')
+              .insert(record);
+
+        const { error } = await query;
+        if (error) throw error;
+      }
+
+      // Add newly selected Legends without removing past inductees.
+      const existingLegendIds = new Set(
+        savedLegends.map(row => row.golfer_id)
+      );
+
+      const newLegendIds = selectedLegendIds.filter(
+        id => !existingLegendIds.has(id)
+      );
+
+      if (newLegendIds.length) {
+        const records = newLegendIds.map(id => ({
+          league_id: leagueId,
+          award_year: YEAR,
+          award_type: 'bogus_boys_legend',
+          golfer_id: id
+        }));
+
+        const { error } = await db
+          .from('bb_hall_special_awards')
+          .insert(records);
+
+        if (error) throw error;
+      }
 
       await load();
       status.textContent = 'Special awards saved successfully.';
+
     } catch (error) {
       console.error('Special awards save error:', error);
       status.textContent = 'Save failed: ' + error.message;
@@ -154,7 +215,7 @@
 
   load().catch(error => {
     console.error('Special awards load error:', error);
-    status.textContent = 'Unable to load special awards: ' +
-      error.message;
+    status.textContent =
+      'Unable to load special awards: ' + error.message;
   });
 })();
