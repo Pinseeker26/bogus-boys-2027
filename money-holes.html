@@ -1,13 +1,171 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Money Holes | Bogus Boys 2027</title><link rel="stylesheet" href="css/home-2027.css"><link rel="stylesheet" href="css/commissioner-hq.css"><link rel="stylesheet" href="css/money-holes-2027.css"></head><body><header class="top"><div class="wrap nav"><a class="identity" href="index.html"><img src="images/bogus-boys-2027-logo.png" alt="Bogus Boys"><span>BOGUS BOYS <small>2027 GOLF LEAGUE</small></span></a>
-<nav aria-label="Main navigation">
-  <a href="index.html">Home</a>
-  <a href="this-week.html">This Week</a>
-  <a href="standings.html">BBPts</a>
-  <a href="weekly-results.html">Results</a>
-  <a href="playoffs.html">Playoffs</a>
-  <a href="players.html">Players</a>
-  <a href="money-holes.html" aria-current="page">Money Holes</a>
-  <a href="rules.html">Rules</a>
-  <a href="commissioner-hq.html">Commissioner</a>
-</nav>
-</div></header><div class="hq-hero"><div class="wrap"><span class="kicker">BOGUS BOYS • 2027 SEASON</span><h1>MONEY <em>HOLES</em></h1><p>Flight-by-flight contest winners, payouts and weekly history.</p></div></div><main class="wrap hq-main"><div class="notice"><strong></div><div class="mh-controls"><label for="mh-week">LEAGUE WEEK <select id="mh-week"></select></label><label for="mh-flight">FLIGHT <select id="mh-flight"><option value="all">Both flights</option><option value="A">Flight A</option><option value="B">Flight B</option></select></label><a class="mh-action" href="weekly-results.html">Manage contests in Weekly Results →</a></div><div class="hq-stats"><article><span>CONTESTS THIS WEEK</span><strong id="mh-count">0</strong><small>Recorded money holes</small></article><article><span>WEEKLY PAYOUTS</span><strong id="mh-total">$0</strong><small>Across recorded contests</small></article><article><span>SEASON PAYOUTS</span><strong id="mh-season">$0</strong><small>All 24 weeks</small></article><article><span>WEEK STATUS</span><strong id="mh-status">OPEN</strong><small>Results are saved locally</small></article></div><section class="hq-panel"><span class="kicker">SELECTED WEEK</span><h2>Contest Results</h2><div id="mh-contests" class="mh-list"></div></section><section class="hq-panel"><span class="kicker">SEASON RECORD</span><h2>Money Hole History</h2><div class="mh-table-wrap"><table class="mh-table"><thead><tr><th>Week</th><th>Contest</th><th>Winner</th><th>Flight</th><th>Payout</th></tr></thead><tbody id="mh-history"></tbody></table></div></section></main><footer><div class="wrap footer"><div><strong>BOGUS BOYS</strong><small>2027 GOLF LEAGUE</small></div><span>Money Holes • Local prototype</span></div></footer><script src="js/league-settings.js"></script><script src="js/league-demo.js"></script><script src="js/money-holes-2027.js"></script></body></html>
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Money Holes | Bogus Boys 2027</title>
+
+  <link rel="stylesheet" href="css/home-2027.css">
+  <link rel="stylesheet" href="css/commissioner-hq.css">
+  <link rel="stylesheet" href="css/money-holes-2027.css">
+</head>
+
+<body>
+
+<header class="top">
+  <div class="wrap nav">
+
+    <a class="identity" href="index.html">
+      <img
+        src="images/bogus-boys-2027-logo.png"
+        alt="Bogus Boys"
+      >
+      <span>
+        BOGUS BOYS
+        <small>2027 GOLF LEAGUE</small>
+      </span>
+    </a>
+
+    <nav aria-label="Main navigation">
+      <a href="index.html">Home</a>
+      <a href="this-week.html">This Week</a>
+      <a href="standings.html">BBPts</a>
+      <a href="weekly-results.html">Results</a>
+      <a href="playoffs.html">Playoffs</a>
+      <a href="players.html">Players</a>
+      <a href="money-holes.html" aria-current="page">Money Holes</a>
+      <a href="rules.html">Rules</a>
+      <a href="commissioner-hq.html">Commissioner</a>
+    </nav>
+
+  </div>
+</header>
+
+<div class="hq-hero">
+  <div class="wrap">
+    <span class="kicker">BOGUS BOYS • 2027 SEASON</span>
+    <h1>MONEY <em>HOLES</em></h1>
+    <p>Flight-by-flight contest winners, payouts and weekly history.</p>
+  </div>
+</div>
+
+<main class="wrap hq-main">
+
+  <div class="notice">
+    Official Bogus Boys Money Hole results.
+    Contests, winners, and payments are managed
+    through Commissioner HQ.
+  </div>
+
+  <div class="mh-controls">
+
+    <label for="mh-week">
+      LEAGUE WEEK
+      <select id="mh-week"></select>
+    </label>
+
+    <label for="mh-flight">
+      FLIGHT
+      <select id="mh-flight">
+        <option value="all">Both flights</option>
+        <option value="A">Flight A</option>
+        <option value="B">Flight B</option>
+      </select>
+    </label>
+
+    <a class="mh-action" href="commissioner-hq.html">
+      Manage contests in Commissioner HQ →
+    </a>
+
+  </div>
+
+  <div class="hq-stats">
+
+    <article>
+      <span>CONTESTS THIS WEEK</span>
+      <strong id="mh-count">0</strong>
+      <small>Recorded money holes</small>
+    </article>
+
+    <article>
+      <span>WEEKLY PAYOUTS</span>
+      <strong id="mh-total">$0</strong>
+      <small>Awarded funded prizes</small>
+    </article>
+
+    <article>
+      <span>SEASON PAYOUTS</span>
+      <strong id="mh-season">$0</strong>
+      <small>Regular season and playoffs</small>
+    </article>
+
+    <article>
+      <span>WEEK STATUS</span>
+      <strong id="mh-status">OPEN</strong>
+      <small>Official league week status</small>
+    </article>
+
+  </div>
+
+  <section class="hq-panel">
+
+    <span class="kicker">SELECTED WEEK</span>
+    <h2>Contest Results</h2>
+
+    <div id="mh-contests" class="mh-list">
+      Loading live Money Hole results...
+    </div>
+
+  </section>
+
+  <section class="hq-panel">
+
+    <span class="kicker">SEASON RECORD</span>
+    <h2>Money Hole History</h2>
+
+    <div class="mh-table-wrap">
+      <table class="mh-table">
+
+        <thead>
+          <tr>
+            <th>Week</th>
+            <th>Contest</th>
+            <th>Winner</th>
+            <th>Flight</th>
+            <th>Payout</th>
+          </tr>
+        </thead>
+
+        <tbody id="mh-history">
+          <tr>
+            <td colspan="5">
+              Loading official results...
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+    </div>
+
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer">
+    <div>
+      <strong>BOGUS BOYS</strong>
+      <small>2027 GOLF LEAGUE</small>
+    </div>
+    <span>Money Holes • Bogus Boys 2027</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/money-holes-results-online.js"></script>
+
+</body>
+</html>
