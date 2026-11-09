@@ -251,4 +251,126 @@
 
   await loadFlightChampions();
 
+  // Lowest Gross and Lowest Net — finalized league rounds.
+
+  async function loadLowestRoundAwards() {
+    const grossElement =
+      document.getElementById('lowest-gross-award');
+    const netElement =
+      document.getElementById('lowest-net-award');
+
+    if (!grossElement || !netElement) return;
+
+    const setStatus = message => {
+      grossElement.textContent = message;
+      netElement.textContent = message;
+    };
+
+    if (!window.supabase?.createClient ||
+        !cfg?.url || !cfg?.publishableKey) {
+      setStatus('Results unavailable');
+      return;
+    }
+
+    try {
+      const client = window.supabase.createClient(
+        cfg.url,
+        cfg.publishableKey
+      );
+
+      const [weeksResult, golfersResult] = await Promise.all([
+        client.from('weeks')
+          .select('id,status')
+          .eq('league_id', LEAGUE),
+
+        client.from('golfers')
+          .select('id,display_name,kind')
+          .eq('league_id', LEAGUE)
+      ]);
+
+      if (weeksResult.error) throw weeksResult.error;
+      if (golfersResult.error) throw golfersResult.error;
+
+      const finalizedWeekIds = (weeksResult.data || [])
+        .filter(w => w.status === 'finalized')
+        .map(w => w.id);
+
+      if (!finalizedWeekIds.length) {
+        setStatus('To Be Determined');
+        return;
+      }
+
+      const members = new Map(
+        (golfersResult.data || [])
+          .filter(g => g.kind === 'member')
+          .map(g => [g.id, g.display_name])
+      );
+
+      const { data: rounds, error } = await client
+        .from('rounds')
+        .select(
+          'week_id,golfer_id,gross_score,handicap_used,finalized'
+        )
+        .in('week_id', finalizedWeekIds)
+        .eq('finalized', true);
+
+      if (error) throw error;
+
+      const eligible = (rounds || []).filter(r =>
+        members.has(r.golfer_id) &&
+        r.gross_score != null &&
+        Number.isFinite(Number(r.gross_score))
+      );
+
+      function showLowest(element, getScore, label) {
+        const scored = eligible
+          .map(r => ({
+            name: members.get(r.golfer_id),
+            score: getScore(r)
+          }))
+          .filter(r => Number.isFinite(r.score));
+
+        if (!scored.length) {
+          element.textContent = 'To Be Determined';
+          return;
+        }
+
+        const lowest = Math.min(
+          ...scored.map(r => r.score)
+        );
+
+        const names = [...new Set(
+          scored
+            .filter(r => r.score === lowest)
+            .map(r => r.name)
+        )].sort((a, b) => a.localeCompare(b));
+
+        element.textContent =
+          names.join(' / ') +
+          ' — ' + lowest + ' ' + label;
+      }
+
+      showLowest(
+        grossElement,
+        r => Number(r.gross_score),
+        'gross'
+      );
+
+      showLowest(
+        netElement,
+        r => r.handicap_used == null
+          ? NaN
+          : Number(r.gross_score) -
+            Number(r.handicap_used),
+        'net'
+      );
+
+    } catch (error) {
+      console.error('Lowest Round Awards error:', error);
+      setStatus('Results unavailable');
+    }
+  }
+
+  await loadLowestRoundAwards();
+
 })();
