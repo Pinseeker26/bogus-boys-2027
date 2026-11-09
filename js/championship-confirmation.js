@@ -240,20 +240,19 @@
     status.textContent = 'Saving official championship results…';
 
     try {
-      // Clear the previous confirmed order first so that
-      // unique position and golfer constraints cannot conflict.
-      const { error: deleteError } = await db
-        .from('bb_championship_results')
-        .delete()
-        .eq('league_id', leagueId);
+      
+      // Save all four finishing positions in one transaction.
+      // If anything fails, previous results remain unchanged.
+      const { error: saveError } = await db.rpc(
+        'bb_save_championship_results',
+        {
+          p_league_id: leagueId,
+          p_golfer_ids: entries.map(entry => entry.golfer_id)
+        }
+      );
 
-      if (deleteError) throw deleteError;
+      if (saveError) throw saveError;
 
-      const { error: insertError } = await db
-        .from('bb_championship_results')
-        .insert(entries);
-
-      if (insertError) throw insertError;
 
       await load();
 
