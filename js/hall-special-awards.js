@@ -131,7 +131,7 @@
       );
     }
 
-    admin.hidden = !commissioner;
+    admin.style.display = commissioner ? 'block' : 'none';
     status.textContent = '';
   }
 
