@@ -1067,4 +1067,62 @@
 
   await loadMoneyKings();
 
+  // Official Championship Top Four — Commissioner-confirmed results
+  async function loadChampionshipTopFour() {
+    const places = [
+      document.getElementById('championship-first'),
+      document.getElementById('championship-second'),
+      document.getElementById('championship-third'),
+      document.getElementById('championship-fourth')
+    ];
+
+    if (places.some(el => !el)) return;
+
+    try {
+      const client = window.supabase.createClient(
+        window.BB_SUPABASE_CONFIG.url,
+        window.BB_SUPABASE_CONFIG.publishableKey
+      );
+
+      const { data: results, error: resultsError } = await client
+        .from('bb_championship_results')
+        .select('golfer_id,finishing_position')
+        .eq('league_id', LEAGUE)
+        .order('finishing_position');
+
+      if (resultsError) throw resultsError;
+
+      if (!results || results.length !== 4) return;
+
+      const ids = results.map(row => row.golfer_id);
+
+      const { data: golfers, error: golfersError } = await client
+        .from('golfers')
+        .select('id,display_name,kind')
+        .eq('league_id', LEAGUE)
+        .in('id', ids);
+
+      if (golfersError) throw golfersError;
+
+      const names = new Map(
+        (golfers || [])
+          .filter(g => g.kind !== 'guest')
+          .map(g => [g.id, g.display_name])
+      );
+
+      for (const result of results) {
+        const position = Number(result.finishing_position);
+        if (position < 1 || position > 4) continue;
+
+        places[position - 1].textContent =
+          names.get(result.golfer_id) || 'To Be Determined';
+      }
+
+    } catch (error) {
+      console.error('Championship Top Four error:', error);
+    }
+  }
+
+  await loadChampionshipTopFour();
+
 })();
