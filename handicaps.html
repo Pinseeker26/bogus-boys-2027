@@ -1,1 +1,346 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Weekly Handicaps | Bogus Boys 2027</title><link rel="stylesheet" href="css/home-2027.css"><link rel="stylesheet" href="css/handicaps-2027.css"></head><body><header class="top"><div class="wrap nav"><a class="identity" href="index.html"><img src="images/bogus-boys-2027-logo.png" alt="Bogus Boys"><span>BOGUS BOYS <small>2027 GOLF LEAGUE</small></span></a><nav id="links"><a href="index.html">Home</a><a href="weekly-results.html">Weekly Results</a><a class="current" href="handicaps.html">Handicaps</a><a href="standings.html">Standings</a><a href="players.html">Players</a><a href="playoffs.html">Playoffs</a><a href="commissioner.html">Commissioner</a></nav></div></header><section class="hc-hero"><div class="wrap"><span class="hc-kicker">BOGUS BOYS • 2027</span><h1>WEEKLY <em>HANDICAPS</em></h1><p>Flight-by-flight handicap and quota reference. One league, one source of results.</p></div></section><div class="hc-gold"></div><main class="wrap hc-main"><div class="hc-notice"><strong>LOCAL PROTOTYPE:</strong> Handicaps are calculated from recorded 9-hole score history using the league spreadsheet method. Quota targets remain the latest manually entered values. Enter rounds on <a href="handicap-history.html">Handicap History</a> and enter quota targets on <a href="weekly-results.html">Weekly Results</a>.</div><div class="hc-stats"><div><small>ACTIVE GOLFERS</small><strong id="hc-total">0</strong></div><div><small>FLIGHT A</small><strong id="hc-a">0</strong></div><div><small>FLIGHT B</small><strong id="hc-b">0</strong></div></div><div class="hc-toolbar"><div><span class="hc-kicker">CURRENT LEAGUE REFERENCE</span><h2>Handicap &amp; Quota Board</h2><p>Calculated handicap from up to 20 rounds, plus latest recorded quota target.</p></div><input id="hc-search" type="search" placeholder="Search golfer…" aria-label="Search golfer"></div><div class="hc-flights"><section class="hc-card"><div class="hc-card-title"><span>GOLD DIVISION</span><h3>FLIGHT A</h3></div><div class="hc-scroll"><table><thead><tr><th>PLAYER</th><th>9-HOLE HCP</th><th>QUOTA TARGET</th><th>RECORDED</th></tr></thead><tbody id="hc-table-a"></tbody></table></div></section><section class="hc-card"><div class="hc-card-title"><span>BLACK DIVISION</span><h3>FLIGHT B</h3></div><div class="hc-scroll"><table><thead><tr><th>PLAYER</th><th>9-HOLE HCP</th><th>QUOTA TARGET</th><th>RECORDED</th></tr></thead><tbody id="hc-table-b"></tbody></table></div></section></div><section class="hc-help"><h3>How this page works</h3><p>Flight assignments are fixed for the season and managed in Commissioner HQ. The handicap comes from the golfer’s recorded 9-hole score history. The quota target comes from the most recent manually entered Quota score. A dash means that value hasn't been entered yet.</p><p>The supplied West/North/South ratings and slopes are used for Gold and White tees. New courses will require their own rating/slope table. The calculated number follows the league spreadsheet method and is not an official WHS index.</p></section></main><footer><div class="wrap footer"><div><strong>BOGUS BOYS</strong><small>2027 GOLF LEAGUE</small></div><span>PLAY HARD. EARN YOUR POINTS.</span></div></footer><script src="js/league-settings.js"></script><script src="js/league-demo.js"></script><script src="js/handicap-engine.js"></script><script src="js/handicap-engine.js"></script><script src="js/handicaps-2027.js"></script></body></html>
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weekly Handicaps | Bogus Boys 2027</title>
+<link rel="stylesheet" href="css/home-2027.css">
+<link rel="stylesheet" href="css/handicaps-2027.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap nav">
+    <a class="identity" href="index.html">
+      <img src="images/bogus-boys-2027-logo.png" alt="Bogus Boys">
+      <span>BOGUS BOYS <small>2027 GOLF LEAGUE</small></span>
+    </a>
+    <nav id="links">
+      <a href="index.html">Home</a>
+      <a href="this-week.html">This Week</a>
+      <a href="weekly-results.html">Weekly Results</a>
+      <a href="standings.html">Standings</a>
+      <a href="players.html">Players</a>
+      <a class="current" href="handicaps.html">Handicaps</a>
+      <a href="money-holes.html">Money Holes</a>
+      <a href="playoffs.html">Playoffs</a>
+      <a href="rules.html">Rules</a>
+      <a href="commissioner-hq.html">Commissioner HQ</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hc-hero">
+  <div class="wrap">
+    <span class="hc-kicker">BOGUS BOYS • 2027</span>
+    <h1>WEEKLY <em>HANDICAPS</em></h1>
+    <p>Official nine-hole handicaps and quotas for both flights.</p>
+  </div>
+</section>
+<div class="hc-gold"></div>
+
+<main class="wrap hc-main">
+
+  <div class="hc-notice" id="hc-status" role="status">
+    Loading official league handicaps...
+  </div>
+
+  <div class="hc-stats">
+    <div>
+      <small>ACTIVE GOLFERS</small>
+      <strong id="hc-total">0</strong>
+    </div>
+    <div>
+      <small>FLIGHT A</small>
+      <strong id="hc-a">0</strong>
+    </div>
+    <div>
+      <small>FLIGHT B</small>
+      <strong id="hc-b">0</strong>
+    </div>
+  </div>
+
+  <div class="hc-toolbar">
+    <div>
+      <span class="hc-kicker">CURRENT LEAGUE REFERENCE</span>
+      <h2>Handicap &amp; Quota Board</h2>
+      <p>
+        Starting handicaps apply until three qualifying
+        finalized league rounds. Handicaps update as
+        additional rounds are finalized.
+      </p>
+    </div>
+    <input id="hc-search" type="search"
+      placeholder="Search golfer..."
+      aria-label="Search golfer">
+  </div>
+
+  <div class="hc-flights">
+    <section class="hc-card">
+      <div class="hc-card-title">
+        <span>GOLD DIVISION</span>
+        <h3>FLIGHT A</h3>
+      </div>
+      <div class="hc-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>PLAYER</th>
+              <th>9-HOLE HCP</th>
+              <th>QUOTA TARGET</th>
+              <th>FINALIZED ROUNDS</th>
+            </tr>
+          </thead>
+          <tbody id="hc-table-a"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="hc-card">
+      <div class="hc-card-title">
+        <span>BLACK DIVISION</span>
+        <h3>FLIGHT B</h3>
+      </div>
+      <div class="hc-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>PLAYER</th>
+              <th>9-HOLE HCP</th>
+              <th>QUOTA TARGET</th>
+              <th>FINALIZED ROUNDS</th>
+            </tr>
+          </thead>
+          <tbody id="hc-table-b"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section class="hc-help">
+    <h3>How this page works</h3>
+    <p>
+      Only official finalized Bogus Boys League rounds count.
+      Handicaps use the league's nine-hole handicap calculation
+      based on the best eight differentials from the most
+      recent 20 qualifying rounds.
+    </p>
+    <p>
+      The Commissioner assigns a starting handicap until a
+      golfer has three qualifying rounds. Quota is calculated
+      automatically as 18 minus the rounded nine-hole handicap.
+      Handicaps continue updating throughout the playoffs.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer">
+    <div>
+      <strong>BOGUS BOYS</strong>
+      <small>2027 GOLF LEAGUE</small>
+    </div>
+    <span>PLAY HARD. EARN YOUR POINTS.</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/handicap-engine-2027.js"></script>
+
+<script>
+(async function () {
+  'use strict';
+
+  const leagueId = '5c6fde06-0205-4f47-b333-eedcd0b47c12';
+  const status = document.getElementById('hc-status');
+  const search = document.getElementById('hc-search');
+  const tableA = document.getElementById('hc-table-a');
+  const tableB = document.getElementById('hc-table-b');
+
+  const escapeHTML = value => String(value ?? '')
+    .replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;',
+      '"': '&quot;', "'": '&#39;'
+    })[c]);
+
+  const format = value =>
+    value == null || !Number.isFinite(Number(value))
+      ? '—'
+      : Number(value).toLocaleString('en-US', {
+          maximumFractionDigits: 2
+        });
+
+  try {
+    const cfg = window.BB_SUPABASE_CONFIG;
+    if (!cfg || !window.supabase?.createClient) {
+      throw new Error('Supabase connection unavailable.');
+    }
+
+    if (!window.BBHandicap2027?.calculateLeagueHandicap) {
+      throw new Error('Handicap engine unavailable.');
+    }
+
+    const db = window.supabase.createClient(
+      cfg.url, cfg.publishableKey
+    );
+
+    const { data: auth, error: authError } =
+      await db.auth.getUser();
+
+    if (authError) throw authError;
+    if (!auth?.user) {
+      status.textContent =
+        'Please sign in to view official league handicaps.';
+      return;
+    }
+
+    const { data: membership, error: membershipError } =
+      await db.from('memberships')
+        .select('league_id')
+        .eq('league_id', leagueId)
+        .eq('user_id', auth.user.id)
+        .maybeSingle();
+
+    if (membershipError) throw membershipError;
+    if (!membership) {
+      status.textContent = 'League membership required.';
+      return;
+    }
+
+    const results = await Promise.all([
+      db.from('golfers')
+        .select('id,display_name,flight,starting_handicap')
+        .eq('league_id', leagueId),
+
+      db.from('weeks')
+        .select('id,week_number,week_type,status')
+        .eq('league_id', leagueId),
+
+      db.from('rounds')
+        .select('week_id,golfer_id,gross_score,course_rating,slope_rating,finalized')
+        .eq('finalized', true)
+    ]);
+
+    for (const result of results) {
+      if (result.error) throw result.error;
+    }
+
+    const golfers = results[0].data || [];
+    const weeks = new Map(
+      (results[1].data || []).map(w => [w.id, w])
+    );
+
+    const rounds = results[2].data || [];
+
+    const players = golfers.map(golfer => {
+      const history = rounds
+        .filter(round =>
+          round.golfer_id === golfer.id &&
+          round.gross_score != null &&
+          round.course_rating != null &&
+          round.slope_rating != null &&
+          weeks.has(round.week_id) &&
+          weeks.get(round.week_id).status === 'finalized'
+        )
+        .sort((a, b) => {
+          const wa = weeks.get(a.week_id);
+          const wb = weeks.get(b.week_id);
+
+          const na =
+            (wa.week_type === 'playoff' ? 16 : 0) +
+            Number(wa.week_number);
+
+          const nb =
+            (wb.week_type === 'playoff' ? 16 : 0) +
+            Number(wb.week_number);
+
+          return na - nb;
+        })
+        .map(round => ({
+          score: round.gross_score,
+          rating: round.course_rating,
+          slope: round.slope_rating
+        }));
+
+      const result =
+        window.BBHandicap2027.calculateLeagueHandicap(
+          history, golfer.starting_handicap
+        );
+
+      return {
+        ...golfer,
+        handicap: result.playingHandicap,
+        quota: result.quota,
+        roundCount: history.length
+      };
+    });
+
+    const flight = value =>
+      String(value || '').trim().toUpperCase();
+
+    document.getElementById('hc-total').textContent =
+      players.length;
+
+    document.getElementById('hc-a').textContent =
+      players.filter(p => flight(p.flight) === 'A').length;
+
+    document.getElementById('hc-b').textContent =
+      players.filter(p => flight(p.flight) === 'B').length;
+
+    function render() {
+      const query = search.value.trim().toLowerCase();
+
+      function rowsFor(selectedFlight) {
+        const selected = players
+          .filter(p =>
+            flight(p.flight) === selectedFlight &&
+            String(p.display_name || '')
+              .toLowerCase().includes(query)
+          )
+          .sort((a, b) =>
+            String(a.display_name).localeCompare(
+              String(b.display_name)
+            )
+          );
+
+        if (!selected.length) {
+          return '<tr><td colspan="4">No golfers found.</td></tr>';
+        }
+
+        return selected.map(p => `
+          <tr>
+            <td>
+              <a href="players-profile.html?id=${encodeURIComponent(p.id)}">
+                ${escapeHTML(p.display_name)}
+              </a>
+            </td>
+            <td>${format(p.handicap)}</td>
+            <td>${format(p.quota)}</td>
+            <td>${format(p.roundCount)}</td>
+          </tr>
+        `).join('');
+      }
+
+      tableA.innerHTML = rowsFor('A');
+      tableB.innerHTML = rowsFor('B');
+    }
+
+    search.addEventListener('input', render);
+    render();
+
+    status.textContent =
+      'Live handicaps and quotas from finalized league rounds.';
+
+  } catch (error) {
+    console.error('Handicap board error:', error);
+    status.textContent =
+      'Unable to load handicaps: ' + error.message;
+  }
+})();
+</script>
+
+</body>
+</html>
