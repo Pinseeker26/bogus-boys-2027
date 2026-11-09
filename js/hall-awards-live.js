@@ -610,4 +610,136 @@
 
   await loadMostConsistentGolfer();
 
+  // Most Improved Golfer — regular-season handicap improvement.
+  // Uses the existing Bogus Boys handicap engine.
+
+  async function loadMostImprovedGolfer() {
+    const element = document.getElementById('most-improved-award');
+    if (!element) return;
+
+    if (!window.supabase?.createClient ||
+        !cfg?.url || !cfg?.publishableKey ||
+        !window.BBHandicap2027?.calculateLeagueHandicap) {
+      element.textContent = 'Results unavailable';
+      return;
+    }
+
+    try {
+      const client = window.supabase.createClient(
+        cfg.url, cfg.publishableKey
+      );
+
+      const [weeksResult, golfersResult] = await Promise.all([
+        client.from('weeks')
+          .select('id,week_number,status')
+          .eq('league_id', LEAGUE)
+          .eq('week_type', 'regular'),
+
+        client.from('golfers')
+          .select(
+            'id,display_name,kind,starting_handicap'
+          )
+          .eq('league_id', LEAGUE)
+      ]);
+
+      if (weeksResult.error) throw weeksResult.error;
+      if (golfersResult.error) throw golfersResult.error;
+
+      const finalizedWeeks = (weeksResult.data || [])
+        .filter(w => w.status === 'finalized')
+        .sort((a, b) =>
+          Number(a.week_number) - Number(b.week_number)
+        );
+
+      if (!finalizedWeeks.length) {
+        element.textContent = 'To Be Determined';
+        return;
+      }
+
+      const weekOrder = new Map(
+        finalizedWeeks.map(w => [
+          w.id, Number(w.week_number)
+        ])
+      );
+
+      const { data: rounds, error } = await client
+        .from('rounds')
+        .select(
+          'week_id,golfer_id,gross_score,course_rating,slope_rating,finalized'
+        )
+        .in('week_id', finalizedWeeks.map(w => w.id))
+        .eq('finalized', true);
+
+      if (error) throw error;
+
+      const members = (golfersResult.data || [])
+        .filter(g =>
+          g.kind === 'member' &&
+          g.starting_handicap != null &&
+          Number.isFinite(Number(g.starting_handicap))
+        );
+
+      const qualified = [];
+
+      for (const golfer of members) {
+        const history = (rounds || [])
+          .filter(r => r.golfer_id === golfer.id)
+          .sort((a, b) =>
+            weekOrder.get(a.week_id) -
+            weekOrder.get(b.week_id)
+          )
+          .map(r => ({
+            score: r.gross_score,
+            rating: r.course_rating,
+            slope: r.slope_rating
+          }))
+          .filter(window.BBHandicap2027.eligibleRound);
+
+        if (history.length < 8) continue;
+
+        const result =
+          window.BBHandicap2027.calculateLeagueHandicap(
+            history,
+            golfer.starting_handicap
+          );
+
+        if (result.handicap == null) continue;
+
+        qualified.push({
+          name: golfer.display_name,
+          improvement:
+            Number(golfer.starting_handicap) -
+            Number(result.handicap)
+        });
+      }
+
+      if (!qualified.length) {
+        element.textContent = 'To Be Determined';
+        return;
+      }
+
+      const best = Math.max(
+        ...qualified.map(g => g.improvement)
+      );
+
+      const leaders = qualified
+        .filter(g =>
+          Math.abs(g.improvement - best) < 0.005
+        )
+        .map(g => g.name)
+        .sort((a, b) => a.localeCompare(b));
+
+      element.textContent =
+        leaders.join(' / ') +
+        ' — ' + best.toFixed(2) +
+        ' strokes improved';
+
+    } catch (error) {
+      console.error('Most Improved Golfer error:', error);
+      element.textContent = 'Results unavailable';
+    }
+  }
+
+  await loadMostImprovedGolfer();
+
 })();
