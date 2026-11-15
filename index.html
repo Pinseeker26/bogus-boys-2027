@@ -30,4 +30,23 @@
 <section class="panel"><div class="panel-heading"><div><span class="kicker">COMPETITION FORMAT</span><h2>How the 2027 season works</h2></div></div><div class="steps"><div><strong>01</strong><h3>Earn BBPts</h3><p>Compete throughout the regular season under the existing BBPts system.</p></div><div><strong>02</strong><h3>Rotate the game</h3><p>Two weeks of Net Score, followed by two weeks of Quota, repeating throughout the season.</p></div><div><strong>03</strong><h3>Play within flights</h3><p>Weekly prizes and money-hole contests organized by flight.</p></div><div><strong>04</strong><h3>Make the playoffs</h3><p>Four weeks of postseason competition to crown the champion.</p></div></div></section></div>
 <aside class="sidebar"><section class="side-card dark"><span class="kicker">CHAMPIONSHIP TRACKER</span><h2>2027 BBPts</h2><div class="empty">Standings will appear when the season begins.</div><a href="standings.html">View full standings →</a></section><section class="side-card"><span class="kicker">THIS WEEK</span><h2>Flights &amp; money holes</h2><p>Weekly contests, prize holes and payouts will appear here once the schedule is set.</p><a href="money-holes.html">League money holes →</a></section><section class="side-card"><span class="kicker">LEAGUE UPDATES</span><h2>Commissioner's corner</h2><p>Course announcement, schedule, roster and league rules are being finalized for 2027.</p><a href="rules.html">League rules →</a></section><section class="side-card highlight"><span class="kicker">YOUR NEXT STOP</span><h2>Get ready for 2027</h2><p>Check back for player registration and the opening-night announcement.</p></section></aside></section></main>
 <footer><div class="wrap footer"><div><strong>BOGUS BOYS</strong><small>2027 GOLF LEAGUE</small></div><p>League competition, organized.</p><span>Powered by Pin Seeker Competitions</span></div></footer><script src="js/league-settings.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/supabase-config.js"></script><script src="js/home-2027.js"></script></body></html>
+<script src="js/supabase-config.js"></script>
+<script src="js/home-2027.js"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(function () {
+        console.log('Bogus Boys app service worker registered.');
+      })
+      .catch(function (error) {
+        console.error('Service worker registration failed:', error);
+      });
+  });
+}
+</script>
+
+</body>
+</html>
+
