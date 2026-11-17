@@ -32,5 +32,25 @@
 </main><footer><div class="wrap footer"><div><strong>BOGUS BOYS</strong><small>2027 GOLF LEAGUE</small></div><span>PLAY HARD. EARN YOUR POINTS.</span></div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-config.js"></script>
+
 <script src="js/this-week-2027.js"></script>
-</body></html>
+
+<script>
+(function () {
+  const button = document.getElementById('menu');
+  const links = document.getElementById('links');
+
+  if (!button || !links) return;
+
+  button.addEventListener('click', function () {
+    const isOpen = button.getAttribute('aria-expanded') === 'true';
+
+    button.setAttribute('aria-expanded', String(!isOpen));
+    links.classList.toggle('open', !isOpen);
+  });
+})();
+</script>
+
+</body>
+</html>
+
