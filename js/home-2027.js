@@ -2,6 +2,20 @@
 (async () => {
   'use strict';
 
+  // Mobile navigation menu
+  const menuButton = document.getElementById('menu');
+  const menuLinks = document.getElementById('links');
+
+  if (menuButton && menuLinks) {
+    menuButton.addEventListener('click', () => {
+      const isOpen =
+        menuButton.getAttribute('aria-expanded') === 'true';
+
+      menuButton.setAttribute('aria-expanded', String(!isOpen));
+      menuLinks.classList.toggle('open', !isOpen);
+    });
+  }
+
   const $ = id => document.getElementById(id);
   const cfg = window.BB_SUPABASE_CONFIG || {};
   const feedback = $('roster-feedback');
