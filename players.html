@@ -24,4 +24,26 @@
 
 </div></header><div class="players-hero"><div class="wrap"><span class="players-kicker">BOGUS BOYS • 2027</span><h1>THE <em>ROSTER</em></h1><p>Every golfer. Every flight. Every point earned.</p></div></div><div class="gold-line"></div><main class="wrap players-main"><div class="players-notice">Official Bogus Boys player directory. Roster and flight assignments are managed through Commissioner HQ. Available to approved league members..</div><section class="players-summary"><div><small>ACTIVE GOLFERS</small><strong id="player-count">0</strong></div><div><small>FLIGHT A</small><strong id="flight-a-count">0</strong></div><div><small>FLIGHT B</small><strong id="flight-b-count">0</strong></div></section><div class="players-toolbar"><div><span class="players-kicker">THE 2027 FIELD</span><h2>Player Directory</h2><p>Choose a golfer to view their season profile.</p></div><div class="players-actions"><input id="player-search" type="search" placeholder="Search golfers…" aria-label="Search golfers"><select id="flight-filter" aria-label="Filter by flight"><option value="ALL">All flights</option><option value="A">Flight A</option><option value="B">Flight B</option></select></div></div><div class="players-grid" id="players-grid" hidden></div>
 <p id="players-status" role="status">Checking league membership...</p><p class="players-footnote">Players are added and assigned to their season-long flights in <a href="commissioner-online.html">Commissioner HQ</a>. Player profiles will display official season statistics as results become available.</p></main><footer><div class="wrap footer"><div><strong>BOGUS BOYS</strong><small>2027 GOLF LEAGUE</small></div><span>PLAY HARD. EARN YOUR POINTS.</span></div></footer><script src="js/league-settings.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/supabase-config.js"></script><script src="js/players-2027.js"></script></body></html>
+
+<script src="js/supabase-config.js"></script>
+<script src="js/players-2027.js"></script>
+
+<script>
+(function () {
+  const button = document.getElementById('menu');
+  const links = document.getElementById('links');
+
+  if (!button || !links) return;
+
+  button.addEventListener('click', function () {
+    const isOpen = button.getAttribute('aria-expanded') === 'true';
+
+    button.setAttribute('aria-expanded', String(!isOpen));
+    links.classList.toggle('open', !isOpen);
+  });
+})();
+</script>
+
+</body>
+</html>
+
