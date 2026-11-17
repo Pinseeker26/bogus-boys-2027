@@ -352,6 +352,7 @@
 })();
 </script>
 
+
 <script>
 (function () {
   const button = document.getElementById('menu');
@@ -360,13 +361,14 @@
   if (!button || !links) return;
 
   button.addEventListener('click', function () {
-    const isOpen = button.getAttribute('aria-expanded') === 'true';
+    const isOpen = links.classList.contains('open');
 
-    button.setAttribute('aria-expanded', String(!isOpen));
     links.classList.toggle('open', !isOpen);
+    button.setAttribute('aria-expanded', String(!isOpen));
   });
 })();
 </script>
+
 
 </body>
 </html>
