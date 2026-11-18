@@ -21,7 +21,16 @@
   e.preventDefault();say('Creating account…');
   const name=$('reg-first').value.trim()+' '+$('reg-last').value.trim();
   const email=$('reg-email').value.trim(),password=$('reg-password').value;
-  const {data,error}=await db.auth.signUp({email,password,options:{data:{requested_name:name}}});
+  
+const {data,error}=await db.auth.signUp({
+  email,
+  password,
+  options:{
+    data:{requested_name:name},
+    emailRedirectTo:'https://pinseeker26.github.io/bogus-boys-2027/login.html'
+  }
+});
+
   $('reg-password').value='';
   if(error){say(error.message,true);return;}
   if(data.session){$('registration-submit').hidden=false;say('Account created. Submit your name for approval.');}
