@@ -26,10 +26,18 @@
         BOGUS BOYS
         <small>2027 GOLF LEAGUE</small>
       </span>
+   
     </a>
 
-    
-<nav aria-label="Main navigation">
+    <button
+      type="button"
+      aria-controls="links"
+      aria-expanded="false"
+      class="menu"
+      id="menu">☰ Menu</button>
+
+    <nav id="links" aria-label="Main navigation">
+
   <a href="index.html">Home</a>
   <a href="this-week.html">This Week</a>
   <a href="weekly-results.html">Weekly Results</a>
@@ -168,7 +176,24 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-config.js"></script>
+
 <script src="js/money-holes-results-online.js"></script>
+
+<script>
+(function () {
+  const button = document.getElementById('menu');
+  const links = document.getElementById('links');
+
+  if (!button || !links) return;
+
+  button.addEventListener('click', function () {
+    const isOpen = links.classList.contains('open');
+
+    links.classList.toggle('open', !isOpen);
+    button.setAttribute('aria-expanded', String(!isOpen));
+  });
+})();
+</script>
 
 </body>
 </html>
