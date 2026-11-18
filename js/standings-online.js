@@ -16,21 +16,6 @@
 const main = document.querySelector('main');
 if (!main) return;
 
-const navigation = document.querySelector('header nav');
-
-if (navigation) {
-  navigation.innerHTML = `
-    <a href="index.html">Home</a>
-    <a href="this-week.html">This Week</a>
-    <a href="standings.html" aria-current="page">BBPts</a>
-    <a href="weekly-results.html">Results</a>
-    <a href="playoffs.html">Playoffs</a>
-    <a href="players.html">Players</a>
-    <a href="money-holes.html">Money Holes</a>
-    <a href="rules.html">Rules</a>
-    <a href="commissioner-hq.html">Commissioner</a>
-  `;
-}
 
 
   // Replace the old demo interface, including its sample players.
