@@ -16,7 +16,42 @@
 .hq-panel[hidden]{display:none!important}
 .hq-panel h2:first-child{margin-top:0}
 @media(max-width:680px){.panel{margin:14px 10px;padding:16px}.hq-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.hq-tab{padding:12px;min-height:92px}.hq-panel{padding:12px}}
-</style></head><body><main class="panel"><div style="font-weight:900;letter-spacing:.12em">BOGUS BOYS • 2027</div><h1>ONLINE COMMISSIONER HQ</h1><p class="muted">Live Commissioner HQ connected to Supabase for roster, guest assignments, attendance, registration approvals, and schedule management.</p><p class="status" id="online-status" role="status">Checking your account and league permissions…</p><section hidden="" id="online-content"><div class="hq-overview"><p id="who"></p><div class="cards"><div class="card"><span>League</span><strong id="league-name">—</strong></div><div class="card"><span>Season</span><strong id="league-season">—</strong></div><div class="card"><span>Registered members</span><strong id="member-count">—</strong></div><div class="card"><span>Scheduled weeks</span><strong id="week-count">—</strong></div></div></div><nav aria-label="Commissioner HQ sections" class="hq-nav"><button aria-controls="hq-panel-night" aria-selected="true" class="hq-tab" data-hq-tab="night" type="button"><strong>League Night</strong><small>Attendance, scoring switch</small></button><button aria-controls="hq-panel-golfers" aria-selected="false" class="hq-tab" data-hq-tab="golfers" type="button"><strong>Golfers &amp; Flights</strong><small>Roster, guests, approvals</small></button><button aria-controls="hq-panel-money" aria-selected="false" class="hq-tab" data-hq-tab="money" type="button"><strong>Money &amp; Payouts</strong><small>Wagers, contests, fund</small></button><button aria-controls="hq-panel-season" aria-selected="false" class="hq-tab" data-hq-tab="season" type="button"><strong>Season Setup</strong><small>Weeks and schedule</small></button><button aria-controls="hq-panel-playoffs" aria-selected="false" class="hq-tab" data-hq-tab="playoffs" type="button"><strong>Playoffs</strong><small>Championship management</small></button><button aria-controls="hq-panel-settings" aria-selected="false" class="hq-tab" data-hq-tab="settings" type="button"><strong>League Settings</strong><small>Permissions and tools</small></button></nav><div class="hq-panel" data-hq-panel="night" id="hq-panel-night"><section id="self-scoring-manager" style="padding:16px;border:1px solid #8b6a15;border-radius:12px;margin:18px 0"><h2>Golfer Score Entry — ON / OFF</h2><p class="note">OFF by default. Enable only for the selected open week. Golfers can enter their own gross score; commissioners retain full scoring control in Weekly Results.</p><div class="schedule-form"><label>Week<select id="self-score-week"></select></label><label>Golfer entry<select id="self-score-enabled"><option value="false">OFF — Commissioner only</option><option value="true">ON — Golfers may submit</option></select></label></div><button id="self-score-save" type="button">Save scoring permission</button>
+
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap nav">
+    <a class="identity" href="index.html">
+      <img src="images/bogus-boys-2027-logo.png" alt="Bogus Boys">
+      <span>BOGUS BOYS <small>2027 GOLF LEAGUE</small></span>
+    </a>
+
+    <button type="button"
+      aria-controls="links"
+      aria-expanded="false"
+      class="menu"
+      id="menu">☰ Menu</button>
+
+    <nav id="links" aria-label="Main navigation">
+      <a href="index.html">Home</a>
+      <a href="this-week.html">This Week</a>
+      <a href="weekly-results.html">Weekly Results</a>
+      <a href="standings.html">Standings</a>
+      <a href="players.html">Players</a>
+      <a href="handicaps.html">Handicaps</a>
+      <a href="money-holes.html">Money Holes</a>
+      <a href="playoffs.html">Playoffs</a>
+      <a href="rules.html">Rules</a>
+      <a class="current" href="commissioner-hq.html"
+        aria-current="page">Commissioner HQ</a>
+    </nav>
+  </div>
+</header>
+
+<main class="panel">
+<div style="font-weight:900;letter-spacing:.12em">BOGUS BOYS • 2027</div><h1>ONLINE COMMISSIONER HQ</h1><p class="muted">Live Commissioner HQ connected to Supabase for roster, guest assignments, attendance, registration approvals, and schedule management.</p><p class="status" id="online-status" role="status">Checking your account and league permissions…</p><section hidden="" id="online-content"><div class="hq-overview"><p id="who"></p><div class="cards"><div class="card"><span>League</span><strong id="league-name">—</strong></div><div class="card"><span>Season</span><strong id="league-season">—</strong></div><div class="card"><span>Registered members</span><strong id="member-count">—</strong></div><div class="card"><span>Scheduled weeks</span><strong id="week-count">—</strong></div></div></div><nav aria-label="Commissioner HQ sections" class="hq-nav"><button aria-controls="hq-panel-night" aria-selected="true" class="hq-tab" data-hq-tab="night" type="button"><strong>League Night</strong><small>Attendance, scoring switch</small></button><button aria-controls="hq-panel-golfers" aria-selected="false" class="hq-tab" data-hq-tab="golfers" type="button"><strong>Golfers &amp; Flights</strong><small>Roster, guests, approvals</small></button><button aria-controls="hq-panel-money" aria-selected="false" class="hq-tab" data-hq-tab="money" type="button"><strong>Money &amp; Payouts</strong><small>Wagers, contests, fund</small></button><button aria-controls="hq-panel-season" aria-selected="false" class="hq-tab" data-hq-tab="season" type="button"><strong>Season Setup</strong><small>Weeks and schedule</small></button><button aria-controls="hq-panel-playoffs" aria-selected="false" class="hq-tab" data-hq-tab="playoffs" type="button"><strong>Playoffs</strong><small>Championship management</small></button><button aria-controls="hq-panel-settings" aria-selected="false" class="hq-tab" data-hq-tab="settings" type="button"><strong>League Settings</strong><small>Permissions and tools</small></button></nav><div class="hq-panel" data-hq-panel="night" id="hq-panel-night"><section id="self-scoring-manager" style="padding:16px;border:1px solid #8b6a15;border-radius:12px;margin:18px 0"><h2>Golfer Score Entry — ON / OFF</h2><p class="note">OFF by default. Enable only for the selected open week. Golfers can enter their own gross score; commissioners retain full scoring control in Weekly Results.</p><div class="schedule-form"><label>Week<select id="self-score-week"></select></label><label>Golfer entry<select id="self-score-enabled"><option value="false">OFF — Commissioner only</option><option value="true">ON — Golfers may submit</option></select></label></div><button id="self-score-save" type="button">Save scoring permission</button>
 <a href="weekly-results.html"
    style="display:inline-block; background:#FFB612; color:#111;
           padding:10px 16px; border-radius:6px;
@@ -35,4 +70,25 @@
   tabs.forEach(b=>b.addEventListener('click',()=>activate(b.dataset.hqTab)));
   activate('night');
 })();
-</script></section><p><a href="login.html">← Clubhouse Sign In</a> · <a href="index.html">League Home</a></p></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="js/supabase-config.js"></script><script src="js/commissioner-online.js"></script><script src="js/golfers-online.js"></script><script src="js/attendance-online.js"></script><script src="js/phase9-approvals.js"></script><script src="js/money-holes-online.js"></script><script src="js/self-scoring-commissioner.js"></script></body></html>
+</script></section><p><a href="login.html">← Clubhouse Sign In</a> · <a href="index.html">League Home</a></p></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="js/supabase-config.js"></script><script src="js/commissioner-online.js"></script><script src="js/golfers-online.js"></script><script src="js/attendance-online.js"></script><script src="js/phase9-approvals.js"></script><script src="js/money-holes-online.js"></script>
+<script src="js/self-scoring-commissioner.js"></script>
+
+<script>
+(function () {
+  const button = document.getElementById('menu');
+  const links = document.getElementById('links');
+
+  if (!button || !links) return;
+
+  button.addEventListener('click', function () {
+    const isOpen = links.classList.contains('open');
+
+    links.classList.toggle('open', !isOpen);
+    button.setAttribute('aria-expanded', String(!isOpen));
+  });
+})();
+</script>
+
+</body>
+</html>
+
